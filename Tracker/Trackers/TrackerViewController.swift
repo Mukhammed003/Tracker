@@ -11,8 +11,7 @@ final class TrackerViewController: UIViewController {
     
     private lazy var addTrackerButton: UIButton = makeAddTrackerButton()
     private lazy var datePickerButton: UIButton = makeDatePickerButton()
-    private lazy var headerTrackersLabel: UILabel = makeHeaderTrackersLabel()
-    private lazy var searchField: UITextField = makeSearchField()
+    private lazy var searchField: UISearchController = makeSearchField()
     private lazy var notFoundImage: UIImageView = makeNotFoundImage()
     private lazy var notFoundLabel: UILabel = makeNotFoundLabel()
     
@@ -21,6 +20,7 @@ final class TrackerViewController: UIViewController {
         
         view.backgroundColor = .ypWhite
         
+        setupNavBar()
         addSubviews()
         setupConstraints()
     }
@@ -33,31 +33,27 @@ final class TrackerViewController: UIViewController {
         
     }
     
+    private func setupNavBar() {
+        title = "Трекеры"
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: addTrackerButton)
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePickerButton)
+
+        navigationItem.searchController = searchField
+        navigationItem.hidesSearchBarWhenScrolling = false
+    }
+    
     private func addSubviews() {
-         [headerTrackersLabel, searchField,  notFoundImage, notFoundLabel, addTrackerButton, datePickerButton].forEach {
+         [notFoundImage, notFoundLabel].forEach {
                 view.addSubview($0)
             }
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            addTrackerButton.heightAnchor.constraint(equalToConstant: 42),
-            addTrackerButton.widthAnchor.constraint(equalToConstant: 42),
-            addTrackerButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 45),
-            addTrackerButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 6),
-            
-            datePickerButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 49),
-            datePickerButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            
-            headerTrackersLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            headerTrackersLabel.topAnchor.constraint(equalTo: addTrackerButton.bottomAnchor, constant: 1),
-            headerTrackersLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -105),
-            
-            searchField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            searchField.topAnchor.constraint(equalTo: headerTrackersLabel.bottomAnchor, constant: 7),
-            searchField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            searchField.heightAnchor.constraint(equalToConstant: 36),
-            
             notFoundImage.heightAnchor.constraint(equalToConstant: 80),
             notFoundImage.widthAnchor.constraint(equalToConstant: 80),
             notFoundImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -70,7 +66,7 @@ final class TrackerViewController: UIViewController {
     }
     
     private func makeAddTrackerButton() -> UIButton {
-        let addTrackerButton = createUIButton(imageForButton: "add_tracker_icon", forSelector: #selector(clickToAddTrackerButton), colorOfIcon: .black)
+        let addTrackerButton = createUIButton(imageForButton: "plus", forSelector: #selector(clickToAddTrackerButton), colorOfIcon: .black)
         
         return addTrackerButton
     }
@@ -86,18 +82,7 @@ final class TrackerViewController: UIViewController {
         return datePickerButton
     }
     
-    private func makeHeaderTrackersLabel() -> UILabel {
-        let headerTrackersLabel = createUILabel(
-            textOfLabel: "Трекеры",
-            letterSpacing: 0,
-            colorOfLabel: .ypBlack,
-            fontSizeOfLabel: 34,
-            weightOfLabel: .bold)
-        
-        return headerTrackersLabel
-    }
-    
-    private func makeSearchField() -> UITextField {
+    private func makeSearchField() -> UISearchController {
         let searchField = createSearchTextField(placeholderText: "Поиск")
         
         return searchField
@@ -204,33 +189,11 @@ final class TrackerViewController: UIViewController {
         return exampleLabel
     }
     
-    private func createSearchTextField(placeholderText: String) -> UITextField {
-        let someSearchField = UITextField()
-        someSearchField.layer.cornerRadius = 10
-        someSearchField.backgroundColor = .ypGray
-        someSearchField.translatesAutoresizingMaskIntoConstraints = false
-        someSearchField.textColor = .ypTextOfSearchField
-        someSearchField.tintColor = UIColor.gray.withAlphaComponent(0.5)
-//        someSearchField.becomeFirstResponder()
-                
-        someSearchField.attributedPlaceholder = NSAttributedString(
-            string: "Поиск",
-            attributes: [
-                .foregroundColor: UIColor.ypTextOfSearchField.withAlphaComponent(0.5)
-            ]
-        )
+    private func createSearchTextField(placeholderText: String) -> UISearchController {
+        let searchController = UISearchController(searchResultsController: nil)
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = placeholderText
         
-        let searchIcon = UIImageView(image: UIImage(systemName: "magnifyingglass"))
-        searchIcon.tintColor = .ypTextOfSearchField
-        searchIcon.contentMode = .scaleAspectFit
-                
-        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
-        searchIcon.frame = CGRect(x: 5, y: 5, width: 20, height: 20)
-        paddingView.addSubview(searchIcon)
-                
-        someSearchField.leftView = paddingView
-        someSearchField.leftViewMode = .always
-        
-        return someSearchField
+        return searchController
     }
 }
