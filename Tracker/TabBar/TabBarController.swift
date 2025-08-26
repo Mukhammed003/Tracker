@@ -15,7 +15,7 @@ final class TabBarController: UITabBarController {
     }
     
     private func setUpTabs() {
-        let trackerViewController = TrackerViewController()
+        let trackerViewController = TrackersViewController()
         let firstNav = UINavigationController(rootViewController: trackerViewController)
         firstNav.tabBarItem = UITabBarItem(
             title: "Трекеры",

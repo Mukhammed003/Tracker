@@ -7,13 +7,18 @@
 
 import UIKit
 
-final class TrackerViewController: UIViewController {
+final class TrackersViewController: UIViewController {
+    
+    var categories: [TrackerCategory] = []
+    var completedTrackers: [TrackerRecord] = []
     
     private lazy var addTrackerButton: UIButton = makeAddTrackerButton()
     private lazy var datePickerButton: UIButton = makeDatePickerButton()
     private lazy var searchField: UISearchController = makeSearchField()
     private lazy var notFoundImage: UIImageView = makeNotFoundImage()
     private lazy var notFoundLabel: UILabel = makeNotFoundLabel()
+    
+//    private var completeTrackerButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,6 +37,17 @@ final class TrackerViewController: UIViewController {
     @objc private func clickToDatePickerButton() {
         
     }
+    
+//    @objc private func completeOrUncompleteTracker(id: UInt) {
+//        
+//        if completeTrackerButton.imageView?.image == UIImage(systemName: "plus") {
+//            self.completedTrackers.append(TrackerRecord(id: id, date: Date()))
+//        }
+//        else {
+//            self.completedTrackers.removeAll { $0.id == id }
+//        }
+//        
+//    }
     
     private func setupNavBar() {
         title = "Трекеры"
@@ -64,6 +80,23 @@ final class TrackerViewController: UIViewController {
             notFoundLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
         ])
     }
+    
+//    private func createCategory(trackerCategory: TrackerCategory) {
+//            if let index = categories.firstIndex(where: { $0.header == trackerCategory.header }) {
+//                let oldCategory = categories[index]
+//                let updatedCategory = TrackerCategory(
+//                    header: oldCategory.header,
+//                    listOfTrackers: oldCategory.listOfTrackers + trackerCategory.listOfTrackers
+//                )
+//                
+//                categories = categories.enumerated().map { i, element in
+//                    i == index ? updatedCategory : element
+//                }
+//                
+//            } else {
+//                categories = categories + [trackerCategory]
+//            }
+//    }
     
     private func makeAddTrackerButton() -> UIButton {
         let addTrackerButton = createUIButton(imageForButton: "plus", forSelector: #selector(clickToAddTrackerButton), colorOfIcon: .black)
