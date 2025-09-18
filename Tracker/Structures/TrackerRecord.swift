@@ -7,7 +7,12 @@
 
 import UIKit
 
-struct TrackerRecord {
+struct TrackerRecord: Hashable {
     let id: UInt
     let date: Date
+    
+    init(id: UInt, date: Date) {
+            self.id = id
+            self.date = Calendar.current.startOfDay(for: date)
+        }
 }
