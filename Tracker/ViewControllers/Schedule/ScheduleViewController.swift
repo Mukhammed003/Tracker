@@ -9,7 +9,7 @@ import UIKit
 
 final class ScheduleViewController: UIViewController {
     
-    var selectedDays: [String] = []
+    private var selectedDays: [String] = []
 
     var onDaysSelected: (([String]) -> Void)?
     
@@ -90,7 +90,7 @@ final class ScheduleViewController: UIViewController {
     private func setupTableViewWithDaysOfWeek() {
         tableViewWithDaysOfWeek.delegate = self
         tableViewWithDaysOfWeek.dataSource = self
-        tableViewWithDaysOfWeek.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableViewWithDaysOfWeek.register(UITableViewCell.self, forCellReuseIdentifier: Constants.scheduleTableViewCellIdentifier)
     }
     
     private func addSubViews() {
@@ -171,7 +171,7 @@ extension ScheduleViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.scheduleTableViewCellIdentifier, for: indexPath)
         
         cell.textLabel?.text = daysOfWeek[indexPath.row]
         

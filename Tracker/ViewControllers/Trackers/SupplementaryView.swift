@@ -7,7 +7,7 @@
 
 import UIKit
 
-class SupplementaryView: UICollectionReusableView {
+final class SupplementaryView: UICollectionReusableView {
     let titleLabel = UILabel()
     
     override init(frame: CGRect) {
@@ -25,6 +25,7 @@ class SupplementaryView: UICollectionReusableView {
     }
     
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        assertionFailure("init(coder:) has not been implemented")
+        return nil
     }
 }

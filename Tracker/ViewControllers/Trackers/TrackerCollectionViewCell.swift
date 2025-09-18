@@ -9,7 +9,7 @@ import UIKit
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
     
-    static let identifier = Constants.trackerCollectionViewCellIdentifier
+    private static let identifier = Constants.trackerCollectionViewCellIdentifier
     
     private lazy var trackerView: UIView = makeTrackerView()
     private lazy var emojiLabel: UILabel = makeEmojiLabel()
@@ -30,7 +30,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        assertionFailure("init(coder:) has not been implemented")
+        return nil
     }
     
     func configure(tracker: Tracker, isCompleted: Bool, count: Int, completionHandler: @escaping ((UInt, Bool) -> Void)) {
@@ -105,8 +106,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private func makeTrackerView() -> UIView {
         let trackerView = createUIView()
         trackerView.layer.cornerRadius = 16
-        trackerView.layer.borderWidth = 1
-        trackerView.layer.borderColor = UIColor(resource: .ypGray).cgColor
         trackerView.translatesAutoresizingMaskIntoConstraints = false
         
         return trackerView

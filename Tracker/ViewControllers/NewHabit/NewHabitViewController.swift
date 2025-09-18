@@ -7,13 +7,16 @@
 
 import UIKit
 
-final class NewHabitViewController: UIViewController {
+final class NewHabitViewController: UIViewController, UITextFieldDelegate {
     
     private let listOfSections: [String] = ["Категория", "Расписание"]
     
     var categories: [TrackerCategory] = []
     
     var onCreate: (([TrackerCategory]) -> Void)?
+    
+    private var isTextFieldFilled = false
+    private var isDaysSelected = false
     
     private lazy var trackerNameTextField: UITextField = makeTrackerNameTextField()
     private lazy var tableViewWithSections: UITableView = makeTableViewWithSections()
@@ -36,6 +39,11 @@ final class NewHabitViewController: UIViewController {
         trackerNameTextField.becomeFirstResponder()
     }
     
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+    
     @objc private func cancelButtonClicked() {
         print("Кнопка отменить нажата")
         dismiss(animated: true)
@@ -44,46 +52,19 @@ final class NewHabitViewController: UIViewController {
     @objc private func createButtonClicked() {
         print("Кнопка создать нажата")
         
-        let availableColours: [UIColor] = [
-            UIColor(resource: .colorSelection1),
-            UIColor(resource: .colorSelection2),
-            UIColor(resource: .colorSelection3),
-            UIColor(resource: .colorSelection4),
-            UIColor(resource: .colorSelection5),
-            UIColor(resource: .colorSelection6),
-            UIColor(resource: .colorSelection7),
-            UIColor(resource: .colorSelection8),
-            UIColor(resource: .colorSelection9),
-            UIColor(resource: .colorSelection10),
-            UIColor(resource: .colorSelection11),
-            UIColor(resource: .colorSelection12),
-            UIColor(resource: .colorSelection13),
-            UIColor(resource: .colorSelection14),
-            UIColor(resource: .colorSelection15),
-            UIColor(resource: .colorSelection16),
-            UIColor(resource: .colorSelection17),
-            UIColor(resource: .colorSelection18)
-        ]
-        
-        let emojis: [String] = [
-            "🌟", "🔥", "🎯", "🚀", "🌈",
-            "💡", "📚", "🧠", "🎉", "💪",
-            "😎", "🍀", "☕️", "🎵", "📅",
-            "💤", "🏃‍♂️", "📝", "🌞", "🐾"
-        ]
-        
         let indexPath = IndexPath(row: 1, section: 0)
         
         guard let trackerNameText = trackerNameTextField.text,
               let selectedDaysOfWeekInString = tableViewWithSections.cellForRow(at: indexPath)?.detailTextLabel?.text,
-              let color = availableColours.randomElement(),
-              let emoji = emojis.randomElement() else {
+              let color = NewTrackerSetup.availableColours.randomElement(),
+              let emoji = NewTrackerSetup.emojis.randomElement() else {
             return
         }
         
-        let selectedDaysOfWeek: [DaysOfWeek] = returnSelectedDaysOfWeek()
+        let selectedDaysOfWeek: [DaysOfWeek]? = returnSelectedDaysOfWeek()
         
         if !trackerNameText.isEmpty, !selectedDaysOfWeekInString.isEmpty {
+            
             let newTrackerId: UInt = findTheLastIdOfTracker() + 1
             let newTracker: Tracker = Tracker(id: newTrackerId, name: trackerNameText, color: color, emoji: emoji, schedule: selectedDaysOfWeek)
             
@@ -92,19 +73,12 @@ final class NewHabitViewController: UIViewController {
             onCreate?(newTrackerCategory)
             dismiss(animated: true)
             
-        } else {
-            let alert = UIAlertController(
-                title: "Надо заполнить все поля",
-                message: nil,
-                preferredStyle: .alert
-            )
-            let action = UIAlertAction(title: "Понятно", style: .default, handler: nil)
-            alert.addAction(action)
-            DispatchQueue.main.async {
-                self.present(alert, animated: true)
-            }
-            print("Надо заполнить все поля")
         }
+    }
+    
+    @objc private func textFieldDidChange(_ textField: UITextField) {
+        isTextFieldFilled = !(textField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+        updateCreateButtonState()
     }
     
     private func setupTableViewWithSections() {
@@ -150,6 +124,8 @@ final class NewHabitViewController: UIViewController {
         trackerNameTextField.layer.cornerRadius = 16
         trackerNameTextField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0))
         trackerNameTextField.leftViewMode = .always
+        trackerNameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        trackerNameTextField.delegate = self
         trackerNameTextField.translatesAutoresizingMaskIntoConstraints = false
         
         return trackerNameTextField
@@ -189,6 +165,7 @@ final class NewHabitViewController: UIViewController {
         createButton.contentHorizontalAlignment = .center
         createButton.backgroundColor = .ypGray
         createButton.layer.cornerRadius = 16
+        createButton.isEnabled = false
         createButton.addTarget(self, action: #selector(createButtonClicked), for: .touchUpInside)
         createButton.translatesAutoresizingMaskIntoConstraints = false
         
@@ -214,29 +191,19 @@ final class NewHabitViewController: UIViewController {
     }
     
     private func findTheLastIdOfTracker() -> UInt {
-        var maxIdOfTracker: UInt = 0
-        
-        if categories.isEmpty {
-            maxIdOfTracker = 100000
-        } else {
-            for trackerCategory in categories {
-                guard let lastTrackerId = trackerCategory.listOfTrackers.last?.id else { fatalError("Не может быть категории хотя бы без одного трекера") }
-                
-                if lastTrackerId > maxIdOfTracker {
-                    maxIdOfTracker = lastTrackerId
-                }
-        
-            }
-        }
-        
-        return maxIdOfTracker
+        return categories
+                    .flatMap({ $0.listOfTrackers })
+                    .compactMap({ $0.id })
+                    .max()
+                ?? 100000
     }
     
-    private func returnSelectedDaysOfWeek() -> [DaysOfWeek] {
+    private func returnSelectedDaysOfWeek() -> [DaysOfWeek]? {
         let indexPath: IndexPath = IndexPath(row: 1, section: 0)
         
         guard let selectedDaysOfWeek = tableViewWithSections.cellForRow(at: indexPath)?.detailTextLabel?.text else {
-            fatalError("Не может быть пустым так как иначе кнопка создать не кликается")
+            assertionFailure("Не может быть пустым так как иначе кнопка создать не кликается")
+            return nil
         }
         
         var daysOfWeek: [DaysOfWeek] = []
@@ -257,6 +224,15 @@ final class NewHabitViewController: UIViewController {
         return daysOfWeek
     }
     
+    private func updateCreateButtonState() {
+        let shouldBeActive = isDaysSelected && isTextFieldFilled
+        
+        createButton.isEnabled = shouldBeActive
+        UIView.animate(withDuration: 0.3) {
+            self.createButton.backgroundColor = shouldBeActive ? .ypBlack : .ypGray
+        }
+    }
+    
 }
 
 extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
@@ -266,12 +242,13 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var cell = tableView.dequeueReusableCell(withIdentifier: "cell")
+        var cell = tableView.dequeueReusableCell(withIdentifier: Constants.newHabitTableViewCellIdentifier)
         if cell == nil {
-            cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
+            cell = UITableViewCell(style: .subtitle, reuseIdentifier: Constants.newHabitTableViewCellIdentifier)
         }
         
-        guard let cell = cell else { fatalError("Cannot create new cell") }
+        guard let cell = cell else { assertionFailure("Cannot create new cell")
+            return UITableViewCell(style: .subtitle, reuseIdentifier: Constants.newHabitTableViewCellIdentifier)}
         
         cell.textLabel?.text = listOfSections[indexPath.row]
         cell.accessoryType = .disclosureIndicator
@@ -306,6 +283,9 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
             
             scheduleVc.onDaysSelected = { [weak self] days in
                 guard let self = self else { return }
+                
+                self.isDaysSelected = !days.isEmpty
+                updateCreateButtonState()
                 
                 let workingDays: [String] = ["Пн", "Вт", "Ср", "Чт", "Пт"]
                 let weekendDays: [String] = ["Сб", "Вс"]

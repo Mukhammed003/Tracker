@@ -12,7 +12,7 @@ struct TrackerRecord: Hashable {
     let date: Date
     
     init(id: UInt, date: Date) {
-            self.id = id
-            self.date = Calendar.current.startOfDay(for: date)
-        }
+        self.id = id
+        self.date = Calendar.current.startOfDay(for: date)
+    }
 }

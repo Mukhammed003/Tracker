@@ -26,12 +26,12 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     lazy var record2 = TrackerCategory(header: "Сегодня", listOfTrackers: listOfTRackers2)
     lazy var record3 = TrackerCategory(header: "Когда закончу школу", listOfTrackers: listOfTRackers3)
     
-    lazy var categories: [TrackerCategory] = [record1, record2, record3]
-    var completedTrackers: Set<TrackerRecord> = []
-    var needTrackersByDate: [TrackerCategory] = []
-    var currentDate: Date = Date()
+    private lazy var categories: [TrackerCategory] = [record1, record2, record3]
+    private var completedTrackers: Set<TrackerRecord> = []
+    private var needTrackersByDate: [TrackerCategory] = []
+    private var currentDate: Date = Date()
     
-    let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+    private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
     private lazy var addTrackerButton: UIButton = makeAddTrackerButton()
     private lazy var datePicker: UIDatePicker = makeDatePicker()
@@ -209,7 +209,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     
     private func makeNotFoundImage() -> UIImageView {
         let notFoundImage = createUIImageView(
-            nameOfImage: "not_found_image",
+            nameOfImage: .notFound,
             radiusIfNeeded: 0)
         
         return notFoundImage
@@ -234,8 +234,8 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         return splashContainerView
     }
     
-    private func createUIImageView(nameOfImage imageName: String, radiusIfNeeded cornerRadius: CGFloat) -> UIImageView {
-        let exampleImage = UIImage(named: imageName)
+    private func createUIImageView(nameOfImage imageResource: ImageResource, radiusIfNeeded cornerRadius: CGFloat) -> UIImageView {
+        let exampleImage = UIImage(resource: imageResource)
         let exampleImageView = UIImageView(image: exampleImage)
         exampleImageView.clipsToBounds = true
         
