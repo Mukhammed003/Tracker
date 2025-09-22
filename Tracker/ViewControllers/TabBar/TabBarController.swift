@@ -12,10 +12,17 @@ final class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpTabs()
+        
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .white
+        
+        tabBar.standardAppearance = appearance
+        tabBar.scrollEdgeAppearance = appearance
     }
     
     private func setUpTabs() {
-        let trackerViewController = TrackerViewController()
+        let trackerViewController = TrackersViewController()
         let firstNav = UINavigationController(rootViewController: trackerViewController)
         firstNav.tabBarItem = UITabBarItem(
             title: "Трекеры",
