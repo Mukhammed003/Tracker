@@ -40,10 +40,9 @@ enum NewTrackerSetup {
     ]
     
     static let emojis: [String] = [
-        "🌟", "🔥", "🎯", "🚀", "🌈",
-        "💡", "📚", "🧠", "🎉", "💪",
-        "😎", "🍀", "☕️", "🎵", "📅",
-        "💤", "🏃‍♂️", "📝", "🌞", "🐾"
+        "🙂", "😻", "🌺", "🐶", "❤️", "😱",
+        "😇", "😡", "🥶", "🤔", "🙌", "🍔",
+        "🥦", "🏓", "🥇", "🎸", "🏝", "😪"
     ]
 }
 
@@ -51,6 +50,12 @@ final class Constants {
     static let trackerCollectionViewCellIdentifier = "TrackerCollectionViewCell"
     static let newHabitTableViewCellIdentifier = "NewHabitTableViewCell"
     static let scheduleTableViewCellIdentifier = "ScheduleTableViewCell"
+    static let emojiCollectionViewCellIdentifier = "EmojiCollectionViewCell"
+    static let colorCollectionViewCellIdentifier = "ColorCollectionViewCell"
+    
+    static let identifierOfHeaderForTrackerCollectionView = "headerForTrackerCollectionView"
+    static let identifierOfHeaderForEmojiCollectionView = "headerForEmojiCollectionView"
+    static let identifierOfHeaderForColorCollectionView = "headerForColorCollectionView"
 }
 
 

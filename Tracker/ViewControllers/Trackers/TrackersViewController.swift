@@ -31,7 +31,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     private var needTrackersByDate: [TrackerCategory] = []
     private var currentDate: Date = Date()
     
-    private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+    private let collectionViewForTrackers = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
     private lazy var addTrackerButton: UIButton = makeAddTrackerButton()
     private lazy var datePicker: UIDatePicker = makeDatePicker()
@@ -65,7 +65,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         for (sectionIndex, trackerCategory) in needTrackersByDate.enumerated() {
             if let rowIndex = trackerCategory.listOfTrackers.firstIndex(where: {$0.id == trackerID}) {
                 let indexPath = IndexPath(row: rowIndex, section: sectionIndex)
-                collectionView.reloadItems(at: [indexPath])
+                collectionViewForTrackers.reloadItems(at: [indexPath])
                 break
             }
         }
@@ -117,11 +117,11 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     private func showNeedScreen() {
         if needTrackersByDate.isEmpty {
             splashContainerView.isHidden = false
-            collectionView.isHidden = true
+            collectionViewForTrackers.isHidden = true
         } else {
             splashContainerView.isHidden = true
-            collectionView.isHidden = false
-            collectionView.reloadData()
+            collectionViewForTrackers.isHidden = false
+            collectionViewForTrackers.reloadData()
         }
     }
     
@@ -164,28 +164,28 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     }
     
     private func setupCollectionView() {
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionViewForTrackers.delegate = self
+        collectionViewForTrackers.dataSource = self
+        collectionViewForTrackers.translatesAutoresizingMaskIntoConstraints = false
         
-        collectionView.register(
+        collectionViewForTrackers.register(
             TrackerCollectionViewCell.self,
             forCellWithReuseIdentifier: Constants.trackerCollectionViewCellIdentifier
         )
         
-        collectionView.register(
+        collectionViewForTrackers.register(
             SupplementaryView.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
-            withReuseIdentifier: "header"
+            withReuseIdentifier: Constants.identifierOfHeaderForTrackerCollectionView
         )
         
-        view.addSubview(collectionView)
+        view.addSubview(collectionViewForTrackers)
         
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            collectionViewForTrackers.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            collectionViewForTrackers.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            collectionViewForTrackers.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            collectionViewForTrackers.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
     
@@ -391,13 +391,13 @@ extension TrackersViewController: UICollectionViewDataSource {
         var id: String
         switch kind {
         case UICollectionView.elementKindSectionHeader:
-            id = "header"
+            id = Constants.identifierOfHeaderForTrackerCollectionView
         default:
             id = ""
         }
         
         let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: id, for: indexPath) as! SupplementaryView
-        view.titleLabel.text = needTrackersByDate[indexPath.section].header
+        view.configure(title: needTrackersByDate[indexPath.section].header, leadingInset: 12)
         return view
     } 
 }
