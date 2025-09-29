@@ -7,7 +7,7 @@
 
 import UIKit
 
-enum DaysOfWeek: String, CaseIterable {
+enum DaysOfWeek: String, CaseIterable, Encodable, Decodable {
     case monday = "Пн"
     case tuesday = "Вт"
     case wednesday = "Ср"

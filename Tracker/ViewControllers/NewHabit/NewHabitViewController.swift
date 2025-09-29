@@ -63,8 +63,6 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     @objc private func createButtonClicked() {
         print("Кнопка создать нажата")
         
-        let indexPath = IndexPath(row: 1, section: 0)
-        
         guard let trackerNameText = trackerNameTextField.text else {
             return
         }

@@ -40,12 +40,18 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     private lazy var notFoundImage: UIImageView = makeNotFoundImage()
     private lazy var notFoundLabel: UILabel = makeNotFoundLabel()
     
-//    private var completeTrackerButton: UIButton!
+    private let trackerCategoryStore = TrackerCategoryStore()
+    private let trackerRecordStore = TrackerRecordStore()
+    private let trackerStore = TrackerStore()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = .ypWhite
+        
+        trackerRecordStore.debugPrintAllRecords()
+        trackerStore.debugPrintAllTrackers()
+        trackerCategoryStore.debugPrintAllCategories()
         
         setupNavBar()
         setupCollectionView()
@@ -94,10 +100,16 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
                     categories = categories.enumerated().map { idx, cat in
                         return idx == index ? updatedCategory : cat
                     }
+                    
                     print("Обновили существующую категорию: \(categories)")
+                    
+                    trackerCategoryStore.addToExistingTrackerCategory(newTracker: newTrackerCategory.listOfTrackers[0], header: existingCategory.header)
                 } else {
                     categories = categories + [newTrackerCategory]
+                    
                     print("Добавили новую категорию: \(categories)")
+                    
+                    trackerCategoryStore.addNewTrackerCategory(newTracker: newTrackerCategory.listOfTrackers[0], header: newTrackerCategory.header)
                 }
             }
             filterTrackersByDate()
@@ -319,17 +331,23 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         
         print("Трекер с ID: \(trackerID) добавлен в выполненные")
         print(completedTrackers)
+        
+        guard let trackerCoreData = trackerStore.fetchTrackerById(Int64(trackerID)) else {
+            return
+        }
+        trackerRecordStore.addNewTrackerRecord(tracker: trackerCoreData, date: selectedDate)
     }
     
     private func trackerUncompleted(trackerID: UInt) {
-        
-        print("Трекер с ID: \(trackerID) вычеркнут из выполненных")
         
         let selectedDate = currentDate
         let trackerRecord = TrackerRecord(id: trackerID, date: selectedDate)
         completedTrackers.remove(trackerRecord)
         
+        print("Трекер с ID: \(trackerID) вычеркнут из выполненных")
         print(completedTrackers)
+        
+        trackerRecordStore.deleteTrackerRecordByIdAndDate(Int64(trackerID), date: selectedDate)
     }
     
     private func filterTrackersByDate() {

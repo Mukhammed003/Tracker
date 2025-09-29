@@ -24,7 +24,8 @@ final class SplashViewController: UIViewController {
     private func showTabBarController() {
         let tabBarController = TabBarController()
         
-        if let window = view.window ?? (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
             window.setRoot(tabBarController, animated: true)
         }
     }
