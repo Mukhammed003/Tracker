@@ -9,24 +9,7 @@ import UIKit
 
 final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     
-    var trackerRecord1 = Tracker(id: 834920171, name: "Бабушка прислала открытку в вотсапе", color: UIColor(resource: .ypBlue), emoji: "❤️", schedule: [.friday, .saturday, .wednesday])
-    var trackerRecord2 = Tracker(id: 834920172, name: "Комп", color: UIColor(resource: .colorSelection11), emoji: "😻", schedule: [.monday])
-    var trackerRecord3 = Tracker(id: 834920173, name: "Кошка", color: UIColor(resource: .colorSelection5), emoji: "🌺", schedule: [.wednesday])
-    var trackerRecord4 = Tracker(id: 834920174, name: "Собака", color: UIColor(resource: .colorSelection7), emoji: "😡", schedule: [.friday])
-    var trackerRecord5 = Tracker(id: 834920175, name: "Мышь", color: UIColor(resource: .colorSelection10), emoji: "🙌", schedule: [.friday, .wednesday])
-    var trackerRecord6 = Tracker(id: 834920176, name: "Холодильник", color: UIColor(resource: .colorSelection13), emoji: "😪", schedule: [.tuesday, .saturday, .wednesday])
-    var trackerRecord7 = Tracker(id: 834920177, name: "Пасуда", color: UIColor(resource: .colorSelection6), emoji: "🎸", schedule: [.friday, .saturday])
-    var trackerRecord8 = Tracker(id: 834920178, name: "Сосед", color: UIColor(resource: .colorSelection1), emoji: "🏝", schedule: [.sunday])
-    
-    lazy var listOfTRackers1: [Tracker] = [trackerRecord1, trackerRecord2, trackerRecord3]
-    lazy var listOfTRackers2: [Tracker] = [trackerRecord4, trackerRecord5]
-    lazy var listOfTRackers3: [Tracker] = [trackerRecord6, trackerRecord7, trackerRecord8]
-    
-    lazy var record1 = TrackerCategory(header: "На завтра", listOfTrackers: listOfTRackers1)
-    lazy var record2 = TrackerCategory(header: "Сегодня", listOfTrackers: listOfTRackers2)
-    lazy var record3 = TrackerCategory(header: "Когда закончу школу", listOfTrackers: listOfTRackers3)
-    
-    private lazy var categories: [TrackerCategory] = [record1, record2, record3]
+    private lazy var categories: [TrackerCategory] = []
     private var completedTrackers: Set<TrackerRecord> = []
     private var needTrackersByDate: [TrackerCategory] = []
     private var currentDate: Date = Date()
@@ -49,9 +32,10 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         
         view.backgroundColor = .ypWhite
         
-        trackerRecordStore.debugPrintAllRecords()
-        trackerStore.debugPrintAllTrackers()
-        trackerCategoryStore.debugPrintAllCategories()
+        trackerCategoryStore.delegate = self
+        trackerRecordStore.delegate = self
+        trackerStore.delegate = self
+        loadTrackersFromCoreData()
         
         setupNavBar()
         setupCollectionView()
@@ -373,6 +357,47 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         
         needTrackersByDate = needTrackerCategory
     }
+    
+    private func loadTrackersFromCoreData() {
+        categories = trackerCategoryStore.trackerCategories
+        completedTrackers = Set(trackerRecordStore.trackerRecords)
+        
+        filterTrackersByDate()
+    }
+}
+
+extension TrackersViewController: TrackerStoreDelegate, TrackerRecordStoreDelegate, TrackerCategoryStoreDelegate {
+    
+    func store(_ store: TrackerRecordStore, didUpdate: TrackerRecordStoreUpdate) {
+        
+        DispatchQueue.main.async { [weak self] in
+                self?.loadTrackersFromCoreData()
+                self?.collectionViewForTrackers.reloadData()
+                self?.showNeedScreen()
+            }
+        
+    }
+    
+    func store(_ store: TrackerCategoryStore, didUpdate: TrackerCategoryStoreUpdate) {
+        
+        DispatchQueue.main.async { [weak self] in
+                self?.loadTrackersFromCoreData()
+                self?.collectionViewForTrackers.reloadData()
+                self?.showNeedScreen()
+            }
+        
+    }
+    
+    func store(_ store: TrackerStore, didUpdate: TrackerStoreUpdate) {
+        
+        DispatchQueue.main.async { [weak self] in
+                self?.loadTrackersFromCoreData()
+                self?.collectionViewForTrackers.reloadData()
+                self?.showNeedScreen()
+            }
+        
+    }
+    
 }
 
 
@@ -451,3 +476,5 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,  referenceSizeForHeaderInSection section: Int) -> CGSize { return CGSize(width: collectionView.bounds.width, height: 18)
     }
 }
+
+
