@@ -104,7 +104,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func makeTrackerView() -> UIView {
-        let trackerView = createUIView()
+        let trackerView = UIView()
         trackerView.layer.cornerRadius = 16
         trackerView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -112,7 +112,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func makeEmojiLabel() -> UILabel {
-        let emojiLabel = createUILabel()
+        let emojiLabel = UILabel()
         emojiLabel.font = UIFont.systemFont(ofSize: 15, weight: .medium)
         emojiLabel.textAlignment = .center
         emojiLabel.backgroundColor = .ypWhite.withAlphaComponent(0.3)
@@ -124,7 +124,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func makeTrackerLabel() -> UILabel {
-        let trackerLabel = createUILabel()
+        let trackerLabel = UILabel()
         trackerLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         trackerLabel.textColor = .ypWhite
         trackerLabel.numberOfLines = 2
@@ -134,7 +134,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func makeQuantityView() -> UIView {
-        let quantityView = createUIView()
+        let quantityView = UIView()
         quantityView.backgroundColor = .ypWhite
         quantityView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -142,7 +142,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func makeQuantityLabel() -> UILabel {
-        let quantityLabel = createUILabel()
+        let quantityLabel = UILabel()
         quantityLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         quantityLabel.textColor = .ypBlack
         quantityLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -151,31 +151,13 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func makeQuantityAddButton() -> UIButton {
-        let quantityAddButton = createUIButton()
+        let quantityAddButton = UIButton(type: .system)
         quantityAddButton.layer.cornerRadius = 17
         quantityAddButton.addTarget(self, action: #selector(quantityAddButtonTapped), for: .touchUpInside)
         quantityAddButton.tintColor = .ypWhite
         quantityAddButton.translatesAutoresizingMaskIntoConstraints = false
         
         return quantityAddButton
-    }
-    
-    private func createUIView() -> UIView {
-        let uIView = UIView()
-        
-        return uIView
-    }
-    
-    private func createUILabel() -> UILabel {
-        let exampleLabel = UILabel()
-        
-        return exampleLabel
-    }
-    
-    private func createUIButton() -> UIButton {
-        let uIButton = UIButton(type: .system)
-        
-        return uIButton
     }
     
     private func visualizeQuantityAddButton() {

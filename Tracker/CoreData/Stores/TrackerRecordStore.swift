@@ -13,21 +13,10 @@ enum TrackerRecordStoreError: Error {
     case decodingErrorInvalidTracker
 }
 
-struct TrackerRecordStoreUpdate {
-    struct Move: Hashable {
-        let oldIndex: Int
-        let newIndex: Int
-    }
-    let insertedIndexes: IndexSet
-    let deletedIndexes: IndexSet
-    let updatedIndexes: IndexSet
-    let movedIndexes: Set<TrackerRecordStoreUpdate.Move>
-}
-
 protocol TrackerRecordStoreDelegate: AnyObject {
     func store(
         _ store: TrackerRecordStore,
-        didUpdate: TrackerRecordStoreUpdate
+        didUpdate: StoreUpdate
     )
 }
 
@@ -36,10 +25,7 @@ final class TrackerRecordStore: NSObject {
     private var fetchedResultController: NSFetchedResultsController<TrackerRecordCoreData>?
     
     weak var delegate: TrackerRecordStoreDelegate?
-    private var insertedIndexes: IndexSet?
-    private var deletedIndexes: IndexSet?
-    private var updatedIndexes: IndexSet?
-    private var movedIndexes: Set<TrackerRecordStoreUpdate.Move>?
+    private var frcDelegate: BaseFetchedResultsControllerDelegate<StoreUpdate>?
     
     convenience override init() {
         let context: NSManagedObjectContext
@@ -58,26 +44,33 @@ final class TrackerRecordStore: NSObject {
         super.init()
         
         let fetchRequest = TrackerRecordCoreData.fetchRequest()
-        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \TrackerRecordCoreData.date, ascending: true)
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "tracker.id", ascending: true),
+            NSSortDescriptor(key: "date", ascending: true)
         ]
         let controller = NSFetchedResultsController(
             fetchRequest: fetchRequest,
             managedObjectContext: context,
             sectionNameKeyPath: nil,
-            cacheName: nil)
-        controller.delegate = self
-        self.fetchedResultController = controller
+            cacheName: nil
+        )
+        
+        let delegate = BaseFetchedResultsControllerDelegate<StoreUpdate>(
+            ownerName: "TrackerRecordStore"
+        ) { [weak self] update in
+            guard let self else { return }
+            self.delegate?.store(self, didUpdate: update)
+        }
+        
+        controller.delegate = delegate
+        frcDelegate = delegate
+        fetchedResultController = controller
         
         do {
             try controller.performFetch()
         } catch {
             print("⚠️ TrackerRecordStore: performFetch failed: \(error)")
         }
-    }
-    
-    var trackerRecords: [TrackerRecord] {
-        guard let objects = self.fetchedResultController?.fetchedObjects else { return [] }
-        return objects.compactMap { try? self.trackerRecord(from: $0)}
     }
     
     func addNewTrackerRecord(tracker: TrackerCoreData, date: Date) {
@@ -120,7 +113,12 @@ final class TrackerRecordStore: NSObject {
         }
     }
     
-    func trackerRecord(from trackerRecordCoreData: TrackerRecordCoreData) throws -> TrackerRecord {
+    func getAllRecords() -> [TrackerRecord] {
+        guard let objects = fetchedResultController?.fetchedObjects else { return [] }
+        return objects.compactMap { try? trackerRecord(from: $0) }
+    }
+    
+    private func trackerRecord(from trackerRecordCoreData: TrackerRecordCoreData) throws -> TrackerRecord {
         guard let tracker = trackerRecordCoreData.tracker else {
             throw TrackerRecordStoreError.decodingErrorInvalidTracker
         }
@@ -141,58 +139,5 @@ final class TrackerRecordStore: NSObject {
                 context.rollback()
             }
         }
-    }
-}
-
-extension TrackerRecordStore: NSFetchedResultsControllerDelegate {
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        insertedIndexes = IndexSet()
-        deletedIndexes = IndexSet()
-        updatedIndexes = IndexSet()
-        movedIndexes = Set<TrackerRecordStoreUpdate.Move>()
-    }
-    
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        delegate?.store(
-            self,
-            didUpdate: TrackerRecordStoreUpdate(
-                insertedIndexes: insertedIndexes ?? [],
-                deletedIndexes: deletedIndexes ?? [],
-                updatedIndexes: updatedIndexes ?? [],
-                movedIndexes: movedIndexes ?? []
-            )
-        )
-        insertedIndexes = nil
-        deletedIndexes = nil
-        updatedIndexes = nil
-        movedIndexes = nil
-    }
-    
-    func controller(
-        _ controller: NSFetchedResultsController<NSFetchRequestResult>,
-        didChange anObject: Any,
-        at indexPath: IndexPath?,
-        for type: NSFetchedResultsChangeType,
-        newIndexPath: IndexPath?) {
-            switch type {
-            case .insert:
-                if let indexPath = newIndexPath {
-                    insertedIndexes?.insert(indexPath.item)
-                }
-            case .delete:
-                if let indexPath = indexPath {
-                    deletedIndexes?.insert(indexPath.item)
-                }
-            case .update:
-                if let indexPath = indexPath {
-                    updatedIndexes?.insert(indexPath.item)
-                }
-            case .move:
-                if let oldIndexPath = indexPath, let newIndexPath = newIndexPath {
-                    movedIndexes?.insert(.init(oldIndex: oldIndexPath.item, newIndex: newIndexPath.item))
-                }
-            @unknown default:
-                print("⚠️ TrackerRecordStore: неизвестный NSFetchedResultsChangeType")
-            }
     }
 }

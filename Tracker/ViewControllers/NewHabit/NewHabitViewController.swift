@@ -185,7 +185,7 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     }
     
     private func makeTrackerNameTextField() -> UITextField {
-        let trackerNameTextField = createUITextField()
+        let trackerNameTextField = UITextField()
         trackerNameTextField.placeholder = "Введите название трекера"
         trackerNameTextField.backgroundColor = .ypBackground
         trackerNameTextField.layer.cornerRadius = 16
@@ -199,7 +199,7 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     }
     
     private func makeTableViewWithSections() -> UITableView {
-        let tableViewWithSections = createTableView()
+        let tableViewWithSections = UITableView()
         tableViewWithSections.backgroundColor = .ypBackground
         tableViewWithSections.separatorStyle = .singleLine
         tableViewWithSections.layer.cornerRadius = 16
@@ -209,7 +209,7 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     }
     
     private func makeCancelButton() -> UIButton {
-        let cancelButton = createUIButton()
+        let cancelButton = UIButton(type: .custom)
         cancelButton.setTitle("Отменить", for: .normal)
         cancelButton.setTitleColor(.ypRed, for: .normal)
         cancelButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
@@ -225,7 +225,7 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     }
     
     private func makeCreateButton() -> UIButton {
-        let createButton = createUIButton()
+        let createButton = UIButton(type: .custom)
         createButton.setTitle("Создать", for: .normal)
         createButton.setTitleColor(.systemBackground, for: .normal)
         createButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
@@ -239,28 +239,10 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
         return createButton
     }
     
-    private func createUITextField() -> UITextField {
-        let uITextField = UITextField()
-        
-        return uITextField
-    }
-    
-    private func createTableView() -> UITableView {
-        let uiTableView = UITableView()
-        
-        return uiTableView
-    }
-    
-    private func createUIButton() -> UIButton {
-        let uIButton = UIButton(type: .custom)
-        
-        return uIButton
-    }
-    
     private func findTheLastIdOfTracker() -> UInt {
         return categories
-                    .flatMap({ $0.listOfTrackers })
-                    .compactMap({ $0.id })
+                    .flatMap{ $0.listOfTrackers }
+                    .compactMap{ $0.id }
                     .max()
                 ?? 100000
     }
@@ -331,7 +313,7 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
 extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return listOfSections.count
+        listOfSections.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -350,17 +332,15 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
         cell.detailTextLabel?.textColor = .ypGray
         cell.detailTextLabel?.font = .systemFont(ofSize: 17, weight: .regular)
         
-        if indexPath.row == listOfSections.count - 1 {
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
-        } else {
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        }
+        cell.separatorInset = indexPath.row == listOfSections.count - 1
+        ? UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
+        : UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 75
+        75
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -417,15 +397,13 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
 extension NewHabitViewController: UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 1
+        1
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if collectionView == collectionViewForEmojis {
-            return NewTrackerSetup.emojis.count
-        } else {
-            return NewTrackerSetup.availableColours.count
-        }
+        return collectionView == collectionViewForEmojis
+        ? NewTrackerSetup.emojis.count
+        : NewTrackerSetup.availableColours.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -453,11 +431,9 @@ extension NewHabitViewController: UICollectionViewDataSource {
         var id: String
         switch kind {
         case UICollectionView.elementKindSectionHeader:
-            if collectionView == collectionViewForEmojis {
-                id = Constants.identifierOfHeaderForEmojiCollectionView
-            } else {
-                id = Constants.identifierOfHeaderForColorCollectionView
-            }
+            id = collectionView == collectionViewForEmojis
+            ? Constants.identifierOfHeaderForEmojiCollectionView
+            : Constants.identifierOfHeaderForColorCollectionView
         default:
             id = ""
         }
@@ -466,11 +442,7 @@ extension NewHabitViewController: UICollectionViewDataSource {
             return UICollectionReusableView()
         }
         
-        if collectionView == collectionViewForEmojis {
-            view.configure(title: "Emoji", leadingInset: 28)
-        } else {
-            view.configure(title: "Цвет", leadingInset: 28)
-        }
+        view.configure(title: collectionView == collectionViewForEmojis ? "Emoji" : "Цвет", leadingInset: 28)
         
         return view
     }
@@ -488,22 +460,22 @@ extension NewHabitViewController: UICollectionViewDelegateFlowLayout {
     }
     
     func collectionView(_: UICollectionView, layout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt: Int) -> CGFloat {
-        return 5
+        5
     }
     
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 0
+        0
     }
     
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 24, left: 18, bottom: 24, right: 19)
+        UIEdgeInsets(top: 24, left: 18, bottom: 24, right: 19)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,  referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize(width: collectionView.bounds.width, height: 18)
+        CGSize(width: collectionView.bounds.width, height: 18)
     }
 }

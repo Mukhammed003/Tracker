@@ -15,21 +15,10 @@ enum TrackerStoreError: Error {
     case decodingErrorInvalidschedule
 }
 
-struct TrackerStoreUpdate {
-    struct Move: Hashable {
-        let oldIndex: Int
-        let newIndex: Int
-    }
-    let insertedIndexes: IndexSet
-    let deletedIndexes: IndexSet
-    let updatedIndexes: IndexSet
-    let movedIndexes: Set<Move>
-}
-
 protocol TrackerStoreDelegate: AnyObject {
     func store(
         _ store: TrackerStore,
-        didUpdate: TrackerStoreUpdate
+        didUpdate: StoreUpdate
     )
 }
 
@@ -38,10 +27,7 @@ final class TrackerStore: NSObject {
     private var fetchedResultController: NSFetchedResultsController<TrackerCoreData>?
     
     weak var delegate: TrackerStoreDelegate?
-    private var insertedIndexes: IndexSet?
-    private var deletedIndexes: IndexSet?
-    private var updatedIndexes: IndexSet?
-    private var movedIndexes: Set<TrackerStoreUpdate.Move>?
+    private var frcDelegate: BaseFetchedResultsControllerDelegate<StoreUpdate>?
     
     convenience override init() {
         let context: NSManagedObjectContext
@@ -50,8 +36,7 @@ final class TrackerStore: NSObject {
             context = appDelegate.persistentContainer.viewContext
         } else {
             context = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
-            print("⚠️ Не удалось получить AppDelegate. Используется fallback context (TrackerStore)")
-        }
+            print("⚠️ Не удалось получить AppDelegate. Используется fallback context (TrackerStore)") }
         self.init(context: context)
     }
     
@@ -67,21 +52,26 @@ final class TrackerStore: NSObject {
             fetchRequest: fetchRequest,
             managedObjectContext: context,
             sectionNameKeyPath: nil,
-            cacheName: nil)
-        controller.delegate = self
-        self.fetchedResultController = controller
+            cacheName: nil
+        )
+        
+        let delegate = BaseFetchedResultsControllerDelegate<StoreUpdate>(
+            ownerName: "TrackerStore"
+        ) { [weak self] update in
+            guard let self else { return }
+            self.delegate?.store(self, didUpdate: update)
+        }
+        
+        controller.delegate = delegate
+        frcDelegate = delegate
+        fetchedResultController = controller
         
         do {
-                try controller.performFetch()
-            }
+            try controller.performFetch()
+        }
         catch {
-                print("⚠️ TrackerStore: performFetch failed: \(error)")
-            }
-    }
-    
-    var trackers: [Tracker] {
-        guard let objects = self.fetchedResultController?.fetchedObjects else { return [] }
-        return objects.compactMap { try? self.tracker(from: $0) }
+            print("⚠️ TrackerStore: performFetch failed: \(error)")
+        }
     }
     
     func fetchTrackerById(_ id: Int64) -> TrackerCoreData? {
@@ -123,6 +113,11 @@ final class TrackerStore: NSObject {
         }
     }
     
+    func getAllTrackers() -> [Tracker] {
+        guard let objects = fetchedResultController?.fetchedObjects else { return [] }
+        return objects.compactMap { try? tracker(from: $0) }
+    }
+    
     func tracker(from trackerCoreData: TrackerCoreData) throws -> Tracker {
         guard let color = trackerCoreData.color as? UIColor else {
             throw TrackerStoreError.decodingErrorInvalidColor
@@ -143,59 +138,5 @@ final class TrackerStore: NSObject {
             color: color,
             emoji: emoji,
             schedule: schedule)
-    }
-}
-
-extension TrackerStore: NSFetchedResultsControllerDelegate {
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        insertedIndexes = IndexSet()
-        deletedIndexes = IndexSet()
-        updatedIndexes = IndexSet()
-        movedIndexes = Set<TrackerStoreUpdate.Move>()
-    }
-    
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        delegate?.store(
-            self,
-            didUpdate: TrackerStoreUpdate(
-                insertedIndexes: insertedIndexes ?? [],
-                deletedIndexes: deletedIndexes ?? [],
-                updatedIndexes: updatedIndexes ?? [],
-                movedIndexes: movedIndexes ?? []
-            )
-        )
-        insertedIndexes = nil
-        deletedIndexes = nil
-        updatedIndexes = nil
-        movedIndexes = nil
-    }
-    
-    func controller(
-        _ controller: NSFetchedResultsController<NSFetchRequestResult>,
-        didChange anObject: Any,
-        at indexPath: IndexPath?,
-        for type: NSFetchedResultsChangeType,
-        newIndexPath: IndexPath?
-    ) {
-        switch type {
-        case .insert:
-            if let indexPath = newIndexPath {
-                insertedIndexes?.insert(indexPath.item)
-            }
-        case .delete:
-            if let indexPath = indexPath {
-                deletedIndexes?.insert(indexPath.item)
-            }
-        case .update:
-            if let indexPath = indexPath {
-                updatedIndexes?.insert(indexPath.item)
-            }
-        case .move:
-            if let oldIndexPath = indexPath, let newIndexPath = newIndexPath {
-                movedIndexes?.insert(.init(oldIndex: oldIndexPath.item, newIndex: newIndexPath.item))
-            }
-        @unknown default:
-            print("⚠️ TrackerStore: неизвестный NSFetchedResultsChangeType")
-        }
     }
 }

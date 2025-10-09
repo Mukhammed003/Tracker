@@ -52,13 +52,13 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
             trackerUncompleted(trackerID: trackerID)
         }
         
-        for (sectionIndex, trackerCategory) in needTrackersByDate.enumerated() {
-            if let rowIndex = trackerCategory.listOfTrackers.firstIndex(where: {$0.id == trackerID}) {
-                let indexPath = IndexPath(row: rowIndex, section: sectionIndex)
-                collectionViewForTrackers.reloadItems(at: [indexPath])
-                break
-            }
-        }
+//        for (sectionIndex, trackerCategory) in needTrackersByDate.enumerated() {
+//            if let rowIndex = trackerCategory.listOfTrackers.firstIndex(where: {$0.id == trackerID}) {
+//                let indexPath = IndexPath(row: rowIndex, section: sectionIndex)
+//                collectionViewForTrackers.reloadItems(at: [indexPath])
+//                break
+//            }
+//        }
     }
     
     @objc private func clickToAddTrackerButton() {
@@ -82,7 +82,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
                     let updatedCategory = TrackerCategory(header: existingCategory.header, listOfTrackers: updatedTrackers)
                     
                     categories = categories.enumerated().map { idx, cat in
-                        return idx == index ? updatedCategory : cat
+                        idx == index ? updatedCategory : cat
                     }
                     
                     print("Обновили существующую категорию: \(categories)")
@@ -310,9 +310,6 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
             return
         }
         
-        let trackerRecord = TrackerRecord(id: trackerID, date: selectedDate)
-        completedTrackers.insert(trackerRecord)
-        
         print("Трекер с ID: \(trackerID) добавлен в выполненные")
         print(completedTrackers)
         
@@ -325,8 +322,6 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     private func trackerUncompleted(trackerID: UInt) {
         
         let selectedDate = currentDate
-        let trackerRecord = TrackerRecord(id: trackerID, date: selectedDate)
-        completedTrackers.remove(trackerRecord)
         
         print("Трекер с ID: \(trackerID) вычеркнут из выполненных")
         print(completedTrackers)
@@ -349,53 +344,45 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
                 guard let schedule = tracker.schedule else { return false }
                 return schedule.contains( where: {$0.rawValue == weekDay} )
             }
+                .sorted { $0.id < $1.id }
             
             if !filteredTrackers.isEmpty {
                 needTrackerCategory.append(TrackerCategory(header: trackerCategory.header, listOfTrackers: filteredTrackers))
             }
         }
         
-        needTrackersByDate = needTrackerCategory
+        needTrackersByDate = needTrackerCategory.sorted { $0.header < $1.header}
     }
     
     private func loadTrackersFromCoreData() {
-        categories = trackerCategoryStore.trackerCategories
-        completedTrackers = Set(trackerRecordStore.trackerRecords)
+        categories = trackerCategoryStore.getAllCategories()
+        completedTrackers = Set(trackerRecordStore.getAllRecords())
         
         filterTrackersByDate()
+    }
+    
+    private func reloadDataInCollectionAfterChangingsInCoreData() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.loadTrackersFromCoreData()
+            self.collectionViewForTrackers.reloadData()
+            self.showNeedScreen()
+        }
     }
 }
 
 extension TrackersViewController: TrackerStoreDelegate, TrackerRecordStoreDelegate, TrackerCategoryStoreDelegate {
     
-    func store(_ store: TrackerRecordStore, didUpdate: TrackerRecordStoreUpdate) {
-        
-        DispatchQueue.main.async { [weak self] in
-                self?.loadTrackersFromCoreData()
-                self?.collectionViewForTrackers.reloadData()
-                self?.showNeedScreen()
-            }
-        
+    func store(_ store: TrackerRecordStore, didUpdate: StoreUpdate) {
+        reloadDataInCollectionAfterChangingsInCoreData()
     }
     
-    func store(_ store: TrackerCategoryStore, didUpdate: TrackerCategoryStoreUpdate) {
-        
-        DispatchQueue.main.async { [weak self] in
-                self?.loadTrackersFromCoreData()
-                self?.collectionViewForTrackers.reloadData()
-                self?.showNeedScreen()
-            }
-        
+    func store(_ store: TrackerCategoryStore, didUpdate: StoreUpdate) {
+        reloadDataInCollectionAfterChangingsInCoreData()
     }
     
-    func store(_ store: TrackerStore, didUpdate: TrackerStoreUpdate) {
-        
-        DispatchQueue.main.async { [weak self] in
-                self?.loadTrackersFromCoreData()
-                self?.collectionViewForTrackers.reloadData()
-                self?.showNeedScreen()
-            }
-        
+    func store(_ store: TrackerStore, didUpdate: StoreUpdate) {
+        reloadDataInCollectionAfterChangingsInCoreData()
     }
     
 }
@@ -404,11 +391,11 @@ extension TrackersViewController: TrackerStoreDelegate, TrackerRecordStoreDelega
 extension TrackersViewController: UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return needTrackersByDate.count
+        needTrackersByDate.count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return needTrackersByDate[section].listOfTrackers.count
+        needTrackersByDate[section].listOfTrackers.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -458,22 +445,23 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
         }
     
     func collectionView(_: UICollectionView, layout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt: Int) -> CGFloat {
-        return 9
+        9
     }
     
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 0
+        0
     }
     
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 16, left: 0, bottom: 12, right: 0)
+        UIEdgeInsets(top: 16, left: 0, bottom: 12, right: 0)
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,  referenceSizeForHeaderInSection section: Int) -> CGSize { return CGSize(width: collectionView.bounds.width, height: 18)
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,  referenceSizeForHeaderInSection section: Int) -> CGSize {
+        CGSize(width: collectionView.bounds.width, height: 18)
     }
 }
 

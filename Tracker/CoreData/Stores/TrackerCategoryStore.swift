@@ -13,21 +13,10 @@ enum TrackerCategoryStoreError: Error {
     case decodingErrorInvalidListOfTrackers
 }
 
-struct TrackerCategoryStoreUpdate {
-    struct Move: Hashable {
-        let oldIndex: Int
-        let newIndex: Int
-    }
-    let insertedIndexes: IndexSet
-    let deletedIndexes: IndexSet
-    let updatedIndexes: IndexSet
-    let movedIndexes: Set<TrackerCategoryStoreUpdate.Move>
-}
-
 protocol TrackerCategoryStoreDelegate: AnyObject {
     func store(
         _ store: TrackerCategoryStore,
-        didUpdate: TrackerCategoryStoreUpdate
+        didUpdate: StoreUpdate
     )
 }
 
@@ -36,22 +25,18 @@ final class TrackerCategoryStore: NSObject {
     private var fetchedResultController: NSFetchedResultsController<TrackerCategoryCoreData>?
     
     weak var delegate: TrackerCategoryStoreDelegate?
-    private var insertedIndexes: IndexSet?
-    private var deletedIndexes: IndexSet?
-    private var updatedIndexes: IndexSet?
-    private var movedIndexes: Set<TrackerCategoryStoreUpdate.Move>?
+    private var frcDelegate: BaseFetchedResultsControllerDelegate<StoreUpdate>?
     
     private let trackerStore = TrackerStore()
     
     convenience override init() {
         let context: NSManagedObjectContext
-                
-                if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
-                    context = appDelegate.persistentContainer.viewContext
-                } else {
-                    context = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
-                    print("⚠️ Не удалось получить AppDelegate. Используется fallback context (TrackerCategoryStore)")
-                }
+        
+        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+            context = appDelegate.persistentContainer.viewContext
+        } else {
+            context = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+            print("⚠️ Не удалось получить AppDelegate. Используется fallback context (TrackerCategoryStore)") }
         self.init(context: context)
     }
     
@@ -65,9 +50,19 @@ final class TrackerCategoryStore: NSObject {
             fetchRequest: fetchRequest,
             managedObjectContext: context,
             sectionNameKeyPath: nil,
-            cacheName: nil)
-        controller.delegate = self
-        self.fetchedResultController = controller
+            cacheName: nil
+        )
+        
+        let delegate = BaseFetchedResultsControllerDelegate<StoreUpdate>(
+            ownerName: "TrackerCategoryStore"
+        ) { [weak self] update in
+            guard let self else { return }
+            self.delegate?.store(self, didUpdate: update)
+        }
+        
+        controller.delegate = delegate
+        frcDelegate = delegate
+        fetchedResultController = controller
         
         do {
             try controller.performFetch()
@@ -75,11 +70,6 @@ final class TrackerCategoryStore: NSObject {
         catch {
             print("⚠️ TrackerCategoryStore: performFetch failed: \(error)")
         }
-    }
-    
-    var trackerCategories: [TrackerCategory] {
-        guard let objects = self.fetchedResultController?.fetchedObjects else { return [] }
-        return objects.compactMap { try? self.trackerCategory(from: $0) }
     }
     
     func addNewTrackerCategory(newTracker: Tracker, header: String) {
@@ -124,7 +114,12 @@ final class TrackerCategoryStore: NSObject {
         }
     }
     
-    func trackerCategory(from trackerCategoryCoreData: TrackerCategoryCoreData) throws -> TrackerCategory {
+    func getAllCategories() -> [TrackerCategory] {
+        guard let objects = fetchedResultController?.fetchedObjects else { return [] }
+        return objects.compactMap { try? trackerCategory(from: $0) }
+    }
+    
+    private func trackerCategory(from trackerCategoryCoreData: TrackerCategoryCoreData) throws -> TrackerCategory {
         guard let header = trackerCategoryCoreData.header else {
             throw TrackerCategoryStoreError.decodingErrorInvalidHeader
         }
@@ -133,7 +128,7 @@ final class TrackerCategoryStore: NSObject {
             throw TrackerCategoryStoreError.decodingErrorInvalidListOfTrackers
         }
         
-        let trackers: [Tracker] = try trackersSet.map( { try trackerStore.tracker(from: $0)} )
+        let trackers: [Tracker] = try trackersSet.map { try trackerStore.tracker(from: $0)} 
         
         return TrackerCategory(
             header: header,
@@ -148,58 +143,5 @@ final class TrackerCategoryStore: NSObject {
                 context.rollback()
             }
         }
-    }
-}
-
-extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        insertedIndexes = IndexSet()
-        deletedIndexes = IndexSet()
-        updatedIndexes = IndexSet()
-        movedIndexes = Set<TrackerCategoryStoreUpdate.Move>()
-    }
-    
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        delegate?.store(
-            self,
-            didUpdate: TrackerCategoryStoreUpdate(
-                insertedIndexes: insertedIndexes ?? [],
-                deletedIndexes: deletedIndexes ?? [],
-                updatedIndexes: updatedIndexes ?? [],
-                movedIndexes: movedIndexes ?? []
-            )
-        )
-        insertedIndexes = nil
-        deletedIndexes = nil
-        updatedIndexes = nil
-        movedIndexes = nil
-    }
-    
-    func controller(
-        _ controller: NSFetchedResultsController<any NSFetchRequestResult>,
-        didChange anObject: Any,
-        at indexPath: IndexPath?,
-        for type: NSFetchedResultsChangeType,
-        newIndexPath: IndexPath?) {
-            switch type {
-            case .insert:
-                if let indexPath = newIndexPath {
-                    insertedIndexes?.insert(indexPath.item)
-                }
-            case .delete:
-                if let indexPath = indexPath {
-                    deletedIndexes?.insert(indexPath.item)
-                }
-            case .update:
-                if let indexPath = indexPath {
-                    updatedIndexes?.insert(indexPath.item)
-                }
-            case .move:
-                if let oldIndexPath = indexPath, let newIndexPath = newIndexPath {
-                    movedIndexes?.insert(.init(oldIndex: oldIndexPath.item, newIndex: newIndexPath.item))
-                }
-            @unknown default:
-                print("⚠️ TrackerCategoryStore: неизвестный NSFetchedResultsChangeType")
-            }
     }
 }

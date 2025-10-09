@@ -7,7 +7,7 @@
 
 import UIKit
 
-enum DaysOfWeek: String, CaseIterable, Encodable, Decodable {
+enum DaysOfWeek: String, CaseIterable, Codable {
     case monday = "Пн"
     case tuesday = "Вт"
     case wednesday = "Ср"
@@ -44,6 +44,17 @@ enum NewTrackerSetup {
         "😇", "😡", "🥶", "🤔", "🙌", "🍔",
         "🥦", "🏓", "🥇", "🎸", "🏝", "😪"
     ]
+}
+
+struct StoreUpdate: StoreUpdateProtocol {
+    struct Move: MoveProtocol {
+        let oldIndex: Int
+        let newIndex: Int
+    }
+    let insertedIndexes: IndexSet
+    let deletedIndexes: IndexSet
+    let updatedIndexes: IndexSet
+    let movedIndexes: Set<Move>
 }
 
 final class Constants {

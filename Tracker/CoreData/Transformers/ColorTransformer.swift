@@ -5,7 +5,6 @@
 //  Created by Muhammed Nurmukhanov on 27.09.2025.
 //
 
-import Foundation
 import UIKit
 
 @objc(ColorTransformer)

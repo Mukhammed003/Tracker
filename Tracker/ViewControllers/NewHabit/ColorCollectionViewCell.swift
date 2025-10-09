@@ -63,7 +63,7 @@ final class ColorCollectionViewCell: UICollectionViewCell {
     }
     
     private func makeColorView() -> UIView {
-        let colorView = createUIView()
+        let colorView = UIView()
         colorView.layer.cornerRadius = 8
         colorView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -71,7 +71,7 @@ final class ColorCollectionViewCell: UICollectionViewCell {
     }
     
     private func makeBackgroundView() -> UIView {
-        let backgroundViewForBorder = createUIView()
+        let backgroundViewForBorder = UIView()
         backgroundViewForBorder.layer.cornerRadius = 10
         backgroundViewForBorder.backgroundColor = .systemBackground
         backgroundViewForBorder.layer.borderWidth = 3
@@ -79,11 +79,5 @@ final class ColorCollectionViewCell: UICollectionViewCell {
         backgroundViewForBorder.translatesAutoresizingMaskIntoConstraints = false
         
         return backgroundViewForBorder
-    }
-    
-    private func createUIView() -> UIView {
-        let uIView = UIView()
-        
-        return uIView
     }
 }

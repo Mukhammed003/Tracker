@@ -54,18 +54,12 @@ final class EmojiCollectionViewCell: UICollectionViewCell {
     }
     
     private func makeEmojiLabel() -> UILabel {
-        let emojiLabel = createUILabel()
+        let emojiLabel = UILabel()
         emojiLabel.font = UIFont.systemFont(ofSize: 32, weight: .bold)
         emojiLabel.textAlignment = .center
         emojiLabel.textColor = .black
         emojiLabel.translatesAutoresizingMaskIntoConstraints = false
         
         return emojiLabel
-    }
-    
-    private func createUILabel() -> UILabel {
-        let exampleLabel = UILabel()
-        
-        return exampleLabel
     }
 }
