@@ -114,7 +114,7 @@ final class ScheduleViewController: UIViewController {
     }
     
     private func makeTableViewWithDaysOfWeek() -> UITableView {
-        let tableViewWithDaysOfWeek = createTableView()
+        let tableViewWithDaysOfWeek = UITableView()
         tableViewWithDaysOfWeek.backgroundColor = .ypBackground
         tableViewWithDaysOfWeek.separatorStyle = .singleLine
         tableViewWithDaysOfWeek.layer.cornerRadius = 16
@@ -124,7 +124,7 @@ final class ScheduleViewController: UIViewController {
     }
     
     private func makeReadyButton() -> UIButton {
-        let readyButton = createUIButton()
+        let readyButton = UIButton(type: .custom)
         readyButton.setTitle("Готово", for: .normal)
         readyButton.setTitleColor(.systemBackground, for: .normal)
         readyButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
@@ -135,18 +135,6 @@ final class ScheduleViewController: UIViewController {
         readyButton.translatesAutoresizingMaskIntoConstraints = false
         
         return readyButton
-    }
-    
-    private func createTableView() -> UITableView {
-        let uiTableView = UITableView()
-        
-        return uiTableView
-    }
-    
-    private func createUIButton() -> UIButton {
-        let uIButton = UIButton(type: .custom)
-        
-        return uIButton
     }
     
     private func sortDaysOfWeek() {
@@ -167,7 +155,7 @@ final class ScheduleViewController: UIViewController {
 
 extension ScheduleViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return daysOfWeek.count
+        daysOfWeek.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -184,16 +172,14 @@ extension ScheduleViewController: UITableViewDataSource, UITableViewDelegate {
         cell.accessoryView = toggle
         cell.backgroundColor = .ypBackground
         
-        if indexPath.row == daysOfWeek.count - 1 {
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
-        } else {
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        }
+        cell.separatorInset = indexPath.row == daysOfWeek.count - 1
+        ? UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
+        : UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 75
+        75
     }
 }

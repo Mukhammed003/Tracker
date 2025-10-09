@@ -7,7 +7,7 @@
 
 import UIKit
 
-enum DaysOfWeek: String, CaseIterable {
+enum DaysOfWeek: String, CaseIterable, Codable {
     case monday = "Пн"
     case tuesday = "Вт"
     case wednesday = "Ср"
@@ -40,17 +40,33 @@ enum NewTrackerSetup {
     ]
     
     static let emojis: [String] = [
-        "🌟", "🔥", "🎯", "🚀", "🌈",
-        "💡", "📚", "🧠", "🎉", "💪",
-        "😎", "🍀", "☕️", "🎵", "📅",
-        "💤", "🏃‍♂️", "📝", "🌞", "🐾"
+        "🙂", "😻", "🌺", "🐶", "❤️", "😱",
+        "😇", "😡", "🥶", "🤔", "🙌", "🍔",
+        "🥦", "🏓", "🥇", "🎸", "🏝", "😪"
     ]
+}
+
+struct StoreUpdate: StoreUpdateProtocol {
+    struct Move: MoveProtocol {
+        let oldIndex: Int
+        let newIndex: Int
+    }
+    let insertedIndexes: IndexSet
+    let deletedIndexes: IndexSet
+    let updatedIndexes: IndexSet
+    let movedIndexes: Set<Move>
 }
 
 final class Constants {
     static let trackerCollectionViewCellIdentifier = "TrackerCollectionViewCell"
     static let newHabitTableViewCellIdentifier = "NewHabitTableViewCell"
     static let scheduleTableViewCellIdentifier = "ScheduleTableViewCell"
+    static let emojiCollectionViewCellIdentifier = "EmojiCollectionViewCell"
+    static let colorCollectionViewCellIdentifier = "ColorCollectionViewCell"
+    
+    static let identifierOfHeaderForTrackerCollectionView = "headerForTrackerCollectionView"
+    static let identifierOfHeaderForEmojiCollectionView = "headerForEmojiCollectionView"
+    static let identifierOfHeaderForColorCollectionView = "headerForColorCollectionView"
 }
 
 
