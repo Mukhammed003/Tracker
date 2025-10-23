@@ -17,9 +17,18 @@ final class SplashViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        showTabBarController()
+        
+        let hasLaunchedBefore = UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
+
+        if !hasLaunchedBefore {
+            UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
+            print("Первый запуск приложения")
+            showOnboardingViewController()
+        } else {
+            print("Повторный запуск приложения")
+            showTabBarController()
+        }
     }
-    
     
     private func showTabBarController() {
         let tabBarController = TabBarController()
@@ -27,6 +36,15 @@ final class SplashViewController: UIViewController {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
             window.setRoot(tabBarController, animated: true)
+        }
+    }
+    
+    private func showOnboardingViewController() {
+        let onboardingViewController = OnboardingViewController()
+        
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            window.setRoot(onboardingViewController, animated: true)
         }
     }
     
