@@ -120,6 +120,11 @@ final class ScheduleViewController: UIViewController {
         tableViewWithDaysOfWeek.layer.cornerRadius = 16
         tableViewWithDaysOfWeek.translatesAutoresizingMaskIntoConstraints = false
         
+        if #available(iOS 15.0, *) {
+            tableViewWithDaysOfWeek.sectionHeaderTopPadding = 0
+        }
+        tableViewWithDaysOfWeek.tableHeaderView = UIView(frame: .zero)
+        
         return tableViewWithDaysOfWeek
     }
     
