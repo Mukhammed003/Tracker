@@ -61,6 +61,7 @@ final class Constants {
     static let trackerCollectionViewCellIdentifier = "TrackerCollectionViewCell"
     static let newHabitTableViewCellIdentifier = "NewHabitTableViewCell"
     static let scheduleTableViewCellIdentifier = "ScheduleTableViewCell"
+    static let categoryTableViewCellIdentifier = "CategoryTableViewCell"
     static let emojiCollectionViewCellIdentifier = "EmojiCollectionViewCell"
     static let colorCollectionViewCellIdentifier = "ColorCollectionViewCell"
     

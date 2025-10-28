@@ -18,6 +18,7 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     private var isDaysSelected = false
     private var isEmojiSelected = false
     private var isColorSelected = false
+    private var isCategorySelected = false
     
     private var needEmoji: String = ""
     private var needColor: UIColor = .systemBackground
@@ -69,9 +70,10 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
         
         let selectedDaysOfWeek: [DaysOfWeek]? = returnSelectedDaysOfWeek()
         let newTrackerId: UInt = findTheLastIdOfTracker() + 1
+        guard let selectedCategoryName = returnCategoryName() else { return }
         
         let newTracker: Tracker = Tracker(id: newTrackerId, name: trackerNameText, color: needColor, emoji: needEmoji, schedule: selectedDaysOfWeek)
-        let newTrackerCategory: [TrackerCategory] = [TrackerCategory(header: "На завтра", listOfTrackers: [newTracker])]
+        let newTrackerCategory: [TrackerCategory] = [TrackerCategory(header: selectedCategoryName, listOfTrackers: [newTracker])]
         
         onCreate?(newTrackerCategory)
         dismiss(animated: true)
@@ -273,8 +275,19 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
         return daysOfWeek
     }
     
+    private func returnCategoryName() -> String? {
+        let indexPath: IndexPath = IndexPath(row: 0, section: 0)
+        
+        guard let selectedCategoryName = tableViewWithSections.cellForRow(at: indexPath)?.detailTextLabel?.text else {
+            assertionFailure("Не может быть пустым так как иначе кнопка создать не кликается")
+            return nil
+        }
+        
+        return selectedCategoryName
+    }
+    
     private func updateCreateButtonState() {
-        let shouldBeActive = isDaysSelected && isTextFieldFilled && isEmojiSelected && isColorSelected
+        let shouldBeActive = isCategorySelected && isDaysSelected && isTextFieldFilled && isEmojiSelected && isColorSelected
         
         createButton.isEnabled = shouldBeActive
         UIView.animate(withDuration: 0.3) {
@@ -348,6 +361,26 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
         switch indexPath.row {
         case 0:
             print("Нажали на категорию")
+            
+            let cateogryStore = TrackerCategoryStore()
+            let viewModel = CategoryViewModel(categoryStore: cateogryStore)
+            let categoryVc = CategoryViewController(viewModel: viewModel)
+            let navVc = UINavigationController(rootViewController: categoryVc)
+            navVc.modalPresentationStyle = .pageSheet
+            
+            categoryVc.onCategorySelected = { [weak self] category in
+                guard let self = self else { return }
+                
+                self.isCategorySelected = !category.isEmpty
+                updateCreateButtonState()
+                
+                if let cell = tableView.cellForRow(at: indexPath) {
+                    cell.detailTextLabel?.text = category
+                    print("Выбранная категория записана в подзаголовок: \(category)")
+                }
+            }
+            
+            present(navVc, animated: true)
         case 1:
             print("Нажали на расписание")
             let scheduleVc = ScheduleViewController()
@@ -388,9 +421,7 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
         default:
             break
         }
-        
         tableView.deselectRow(at: indexPath, animated: true)
-        
     }
 }
 

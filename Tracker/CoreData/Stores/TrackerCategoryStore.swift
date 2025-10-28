@@ -72,15 +72,11 @@ final class TrackerCategoryStore: NSObject {
         }
     }
     
-    func addNewTrackerCategory(newTracker: Tracker, header: String) {
+    func addNewCategory(header: String) {
         let category = TrackerCategoryCoreData(context: context)
         category.header = header
-        
-        let tracker = trackerStore.addNewTrackerAndReturn(newTracker: newTracker)
-        
-        category.addToListOfTrackers(tracker)
         saveContext()
-        print("Новый трекер добавлен с новой категорией в TrackerCategoryCoreData")
+        print("Добавлена новая категория в TrackerCategoryCoreData")
     }
     
     func addToExistingTrackerCategory(newTracker: Tracker, header: String) {
