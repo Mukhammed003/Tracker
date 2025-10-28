@@ -89,13 +89,6 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
                     
                     trackerCategoryStore.addToExistingTrackerCategory(newTracker: newTrackerCategory.listOfTrackers[0], header: existingCategory.header)
                 }
-//                  else {
-//                    categories = categories + [newTrackerCategory]
-//                    
-//                    print("Добавили новую категорию: \(categories)")
-//                    
-//                    trackerCategoryStore.addNewTrackerCategory(newTracker: newTrackerCategory.listOfTrackers[0], header: newTrackerCategory.header)
-//                }
             }
             filterTrackersByDate()
             showNeedScreen()
