@@ -44,23 +44,8 @@ final class OnboardingViewController: UIPageViewController, UIPageViewController
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        dataSource = self
-        delegate = self
-        
-        if let first = pages.first {
-            setViewControllers(
-                [first],
-                direction: .forward,
-                animated: true,
-                completion: nil)
-        }
-        
-        view.addSubview(pageControl)
-        
-        NSLayoutConstraint.activate([
-            pageControl.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -134),
-            pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor)
-        ])
+        setupUI()
+        setupPageViewController()
     }
     
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
@@ -101,6 +86,30 @@ final class OnboardingViewController: UIPageViewController, UIPageViewController
            let index = pages.firstIndex(of: viewController) {
             pageControl.currentPage = index
         }
+    }
+    
+    private func setupPageViewController() {
+        dataSource = self
+        delegate = self
+        
+        guard let firstPage = pages.first else { return }
+        setViewControllers(
+            [firstPage],
+            direction: .forward,
+            animated: true,
+            completion: nil)
+    }
+    
+    private func setupUI() {
+        view.addSubview(pageControl)
+        setupConstraints()
+    }
+    
+    private func setupConstraints() {
+        NSLayoutConstraint.activate([
+            pageControl.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -134),
+            pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
     }
     
 }
