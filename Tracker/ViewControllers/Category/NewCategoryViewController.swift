@@ -11,7 +11,17 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     
     var onNewCategoryCreated: ((String) -> Void)?
     
+    private let viewModel: CategoryViewModel
     private var isTextFieldFilled = false
+    
+    init(viewModel: CategoryViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     private lazy var categoryNameTextField: UITextField = makeCategoryNameTextField()
     private lazy var readyButton: UIButton = makeReadyButton()
@@ -20,7 +30,10 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
         super.viewDidLoad()
         
         view.backgroundColor = .systemBackground
-        title = "Новая категория"
+        
+        let titleOfNewCategoryViewController = NSLocalizedString("title_of_newCategoryViewController", comment: "")
+        
+        title = titleOfNewCategoryViewController
         
         addSubViews()
     }
@@ -33,6 +46,14 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     @objc private func buttonReadyClicked() {
         guard let text = categoryNameTextField.text,
               !text.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        
+        let titleOfErrorAlert = NSLocalizedString("title_of_error_alert_on_newCategory_page", comment: "")
+        let messageOfErrorAlert = NSLocalizedString("message_of_error_alert_on_newCategory_page", comment: "")
+        
+        if viewModel.isCategoryExists(text) {
+            showAlert(title: titleOfErrorAlert, message: messageOfErrorAlert)
+            return
+        }
         
         onNewCategoryCreated?(text)
         view.endEditing(true)
@@ -67,31 +88,37 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     }
 
     private func makeReadyButton() -> UIButton {
-        let addCategoryButton = UIButton(type: .custom)
-        addCategoryButton.setTitle("Готово", for: .normal)
-        addCategoryButton.setTitleColor(.systemBackground, for: .normal)
-        addCategoryButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
-        addCategoryButton.contentHorizontalAlignment = .center
-        addCategoryButton.backgroundColor = .ypGray
-        addCategoryButton.layer.cornerRadius = 16
-        addCategoryButton.addTarget(self, action: #selector(buttonReadyClicked), for: .touchUpInside)
-        addCategoryButton.translatesAutoresizingMaskIntoConstraints = false
+        let readyButton = UIButton(type: .custom)
         
-        return addCategoryButton
+        let textOfReadyButton = NSLocalizedString("text_of_readyButton_on_newCategory_page", comment: "")
+        
+        readyButton.setTitle(textOfReadyButton, for: .normal)
+        readyButton.setTitleColor(.systemBackground, for: .normal)
+        readyButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        readyButton.contentHorizontalAlignment = .center
+        readyButton.backgroundColor = .ypGray
+        readyButton.layer.cornerRadius = 16
+        readyButton.addTarget(self, action: #selector(buttonReadyClicked), for: .touchUpInside)
+        readyButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        return readyButton
     }
     
     private func makeCategoryNameTextField() -> UITextField {
-        let trackerNameTextField = UITextField()
-        trackerNameTextField.placeholder = "Введите название категории"
-        trackerNameTextField.backgroundColor = .ypBackground
-        trackerNameTextField.layer.cornerRadius = 16
-        trackerNameTextField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0))
-        trackerNameTextField.leftViewMode = .always
-        trackerNameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-        trackerNameTextField.delegate = self
-        trackerNameTextField.translatesAutoresizingMaskIntoConstraints = false
+        let categoryNameTextField = UITextField()
         
-        return trackerNameTextField
+        let categoryNameTextFieldPlaceholder = NSLocalizedString("placeholder_of_categoryNameTextField_on_newCategory_page", comment: "")
+        
+        categoryNameTextField.placeholder = categoryNameTextFieldPlaceholder
+        categoryNameTextField.backgroundColor = .ypBackground
+        categoryNameTextField.layer.cornerRadius = 16
+        categoryNameTextField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0))
+        categoryNameTextField.leftViewMode = .always
+        categoryNameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        categoryNameTextField.delegate = self
+        categoryNameTextField.translatesAutoresizingMaskIntoConstraints = false
+        
+        return categoryNameTextField
     }
     
     private func updateReadyButtonState() {
@@ -101,6 +128,15 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
         UIView.animate(withDuration: 0.3) {
             self.readyButton.backgroundColor = shouldBeActive ? .ypBlack : .ypGray
         }
+    }
+    
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        
+        let textOfButtonOnErrorAlert = NSLocalizedString("text_of_button_on_error_alert_on_newCategory_page", comment: "")
+        
+        alert.addAction(UIAlertAction(title: textOfButtonOnErrorAlert, style: .default))
+        present(alert, animated: true)
     }
     
 }

@@ -12,7 +12,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     private lazy var categories: [TrackerCategory] = []
     private var completedTrackers: Set<TrackerRecord> = []
     private var needTrackersByDate: [TrackerCategory] = []
-    private var currentDate: Date = Date()
+    private var currentDate: Date = Date().startOfDay
     
     private let collectionViewForTrackers = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
@@ -64,32 +64,41 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     @objc private func clickToAddTrackerButton() {
         let newHabitVc = NewHabitViewController()
         newHabitVc.categories = self.categories
+        
+        newHabitVc.isCategoryExists = { [weak self] categoryName in
+            return self?.trackerCategoryStore.isExistsSuchCategory(withHeader: categoryName) ?? false
+            }
+        
         let navController = UINavigationController(rootViewController: newHabitVc)
         navController.modalPresentationStyle = .pageSheet
         
-        newHabitVc.onCreate = { [weak self] trackerCategory in
+        newHabitVc.onCreate = { [weak self] trackerCategory, completion in
             guard let self = self else { return }
             
-            if !trackerCategory.isEmpty {
-                
-                let newTrackerCategory = trackerCategory[0]
-                
-                if let index = categories.firstIndex(where: {$0.header == newTrackerCategory.header}) {
-                    
-                    let existingCategory = categories[index]
-                    let updatedTrackers = existingCategory.listOfTrackers + newTrackerCategory.listOfTrackers
-                    
-                    let updatedCategory = TrackerCategory(header: existingCategory.header, listOfTrackers: updatedTrackers)
-                    
-                    categories = categories.enumerated().map { idx, cat in
-                        idx == index ? updatedCategory : cat
-                    }
-                    
-                    print("Обновили существующую категорию: \(categories)")
-                    
-                    trackerCategoryStore.addToExistingTrackerCategory(newTracker: newTrackerCategory.listOfTrackers[0], header: existingCategory.header)
-                }
+            let newTrackerCategory = trackerCategory[0]
+            let newTracker = newTrackerCategory.listOfTrackers[0]
+            
+            if trackerCategoryStore.isExistsSuchTrackerInCategory(withHeader: newTrackerCategory.header, withTracker: newTracker.name) {
+                completion(.failure(.duplicate))
+                return
             }
+            
+            if let index = categories.firstIndex(where: {$0.header == newTrackerCategory.header}) {
+                
+                let existingCategory = categories[index]
+                let updatedTrackers = existingCategory.listOfTrackers + newTrackerCategory.listOfTrackers
+                
+                let updatedCategory = TrackerCategory(header: existingCategory.header, listOfTrackers: updatedTrackers)
+                
+                categories = categories.enumerated().map { idx, cat in
+                    idx == index ? updatedCategory : cat
+                }
+                
+                print("Обновили существующую категорию: \(categories)")
+                
+                trackerCategoryStore.addToExistingTrackerCategory(newTracker: newTrackerCategory.listOfTrackers[0], header: existingCategory.header)
+            }
+            completion(.success(()))
             filterTrackersByDate()
             showNeedScreen()
         }
@@ -116,7 +125,10 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     }
     
     private func setupNavBar() {
-        title = "Трекеры"
+        
+        let titleOfNavBarOnTrackersPage = NSLocalizedString("header_of_trackers_page", comment: "")
+        
+        title = titleOfNavBarOnTrackersPage
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.largeTitleDisplayMode = .always
         
@@ -192,7 +204,9 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     }
     
     private func makeSearchField() -> UISearchController {
-        let searchField = createSearchTextField(placeholderText: "Поиск")
+        let placeholderOfSearchField = NSLocalizedString("placeholder_of_searchField_on_trackers_page", comment: "")
+        
+        let searchField = createSearchTextField(placeholderText: placeholderOfSearchField)
         
         return searchField
     }
@@ -206,8 +220,11 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     }
     
     private func makeNotFoundLabel() -> UILabel {
+        
+        let textOfNotFoundLabel = NSLocalizedString("text_of_notFoundLabel_on_trackers_page", comment: "")
+        
         let notFoundLabel = createUILabel(
-            textOfLabel: "Что будем отслеживать?",
+            textOfLabel: textOfNotFoundLabel,
             letterSpacing: 0,
             colorOfLabel: .ypBlack,
             fontSizeOfLabel: 12,
@@ -261,7 +278,10 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         
         datePicker.datePickerMode = .date
         datePicker.preferredDatePickerStyle = .compact
-        datePicker.locale = Locale(identifier: "ru_RU")
+        
+        let localeIdentifierOfDatePicker = NSLocalizedString("locale_identifier_of_datePicker", comment: "")
+        
+        datePicker.locale = Locale(identifier: localeIdentifierOfDatePicker)
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         
         return datePicker
@@ -296,7 +316,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     private func trackerCompleted(trackerID: UInt) {
         
         let selectedDate = currentDate
-        let todaysDate = Date()
+        let todaysDate = Date().startOfDay
         
         if selectedDate > todaysDate {
             print("Нельзя добавлять будущие даты")
@@ -305,12 +325,12 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         }
         
         print("Трекер с ID: \(trackerID) добавлен в выполненные")
-        print(completedTrackers)
         
         guard let trackerCoreData = trackerStore.fetchTrackerById(Int64(trackerID)) else {
             return
         }
         trackerRecordStore.addNewTrackerRecord(tracker: trackerCoreData, date: selectedDate)
+        print(trackerRecordStore.debugPrintAllRecords())
     }
     
     private func trackerUncompleted(trackerID: UInt) {
@@ -318,17 +338,18 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         let selectedDate = currentDate
         
         print("Трекер с ID: \(trackerID) вычеркнут из выполненных")
-        print(completedTrackers)
         
         trackerRecordStore.deleteTrackerRecordByIdAndDate(Int64(trackerID), date: selectedDate)
+        print(trackerRecordStore.debugPrintAllRecords())
     }
     
     private func filterTrackersByDate() {
         let needDate = currentDate
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ru_RU")
-        formatter.dateFormat = "EE"
-        let weekDay = formatter.string(from: needDate)
+        let calendar = Calendar.current
+        let weekdayIndex = calendar.component(.weekday, from: needDate)
+        
+        let days: [DaysOfWeek] = [.sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday]
+        let selectedDay = days[weekdayIndex - 1]
         
         var needTrackerCategory: [TrackerCategory] = []
         
@@ -336,7 +357,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
             
             let filteredTrackers = trackerCategory.listOfTrackers.filter { tracker in
                 guard let schedule = tracker.schedule else { return false }
-                return schedule.contains( where: {$0.rawValue == weekDay} )
+                return schedule.contains(selectedDay)
             }
                 .sorted { $0.id < $1.id }
             

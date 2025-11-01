@@ -7,12 +7,26 @@
 
 import UIKit
 
+enum TreckerCreationError: Error {
+    case duplicate
+}
+
 final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICollectionViewDelegate {
-    private let listOfSections: [String] = ["Категория", "Расписание"]
+    private let listOfSections: [String] = {
+        
+        let textForCategorySection = NSLocalizedString("text_of_category_section_on_newHabit_page", comment: "")
+        let textForScheduleSection = NSLocalizedString("text_of_schedule_section_on_newHabit_page", comment: "")
+        
+        return [
+            textForCategorySection,
+            textForScheduleSection
+        ]
+    }()
     
     var categories: [TrackerCategory] = []
     
-    var onCreate: (([TrackerCategory]) -> Void)?
+    var isCategoryExists: ((String) -> Bool)?
+    var onCreate: (([TrackerCategory], @escaping (Result<Void, TreckerCreationError>) -> Void) -> Void)?
     
     private var isTextFieldFilled = false
     private var isDaysSelected = false
@@ -38,7 +52,10 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
         super.viewDidLoad()
         
         view.backgroundColor = .systemBackground
-        title = "Новая привычка"
+        
+        let titleOfNewHabitViewController = NSLocalizedString("title_of_newHabitViewController", comment: "")
+        
+        title = titleOfNewHabitViewController
         
         setupTableViewWithSections()
         addSubViews()
@@ -67,16 +84,33 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
         guard let trackerNameText = trackerNameTextField.text else {
             return
         }
-        
         let selectedDaysOfWeek: [DaysOfWeek]? = returnSelectedDaysOfWeek()
         let newTrackerId: UInt = findTheLastIdOfTracker() + 1
         guard let selectedCategoryName = returnCategoryName() else { return }
         
-        let newTracker: Tracker = Tracker(id: newTrackerId, name: trackerNameText, color: needColor, emoji: needEmoji, schedule: selectedDaysOfWeek)
-        let newTrackerCategory: [TrackerCategory] = [TrackerCategory(header: selectedCategoryName, listOfTrackers: [newTracker])]
+        let newTracker: Tracker =
+        Tracker(
+            id: newTrackerId,
+            name: trackerNameText,
+            color: needColor,
+            emoji: needEmoji,
+            schedule: selectedDaysOfWeek)
         
-        onCreate?(newTrackerCategory)
-        dismiss(animated: true)
+        let newTrackerCategory: [TrackerCategory] = [
+            TrackerCategory(
+                header: selectedCategoryName,
+                listOfTrackers: [newTracker]
+            )
+        ]
+        
+        onCreate?(newTrackerCategory) {[weak self] result in
+            switch result {
+            case .success:
+                self?.dismiss(animated: true)
+            case .failure(.duplicate):
+                self?.showDuplicateAlert()
+            }
+        }
     }
     
     @objc private func textFieldDidChange(_ textField: UITextField) {
@@ -188,7 +222,10 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     
     private func makeTrackerNameTextField() -> UITextField {
         let trackerNameTextField = UITextField()
-        trackerNameTextField.placeholder = "Введите название трекера"
+        
+        let trackerNameTextFieldPlaceholder = NSLocalizedString("placeholder_of_trackerNameTextField_on_newHabit_page", comment: "")
+        
+        trackerNameTextField.placeholder = trackerNameTextFieldPlaceholder
         trackerNameTextField.backgroundColor = .ypBackground
         trackerNameTextField.layer.cornerRadius = 16
         trackerNameTextField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0))
@@ -212,7 +249,10 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     
     private func makeCancelButton() -> UIButton {
         let cancelButton = UIButton(type: .custom)
-        cancelButton.setTitle("Отменить", for: .normal)
+        
+        let textOfCancelButton = NSLocalizedString("title_of_cancelButton_on_newHabit_page", comment: "")
+        
+        cancelButton.setTitle(textOfCancelButton, for: .normal)
         cancelButton.setTitleColor(.ypRed, for: .normal)
         cancelButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         cancelButton.contentHorizontalAlignment = .center
@@ -228,7 +268,10 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     
     private func makeCreateButton() -> UIButton {
         let createButton = UIButton(type: .custom)
-        createButton.setTitle("Создать", for: .normal)
+        
+        let textOfCreateButton = NSLocalizedString("title_of_createButton_on_newHabit_page", comment: "")
+        
+        createButton.setTitle(textOfCreateButton, for: .normal)
         createButton.setTitleColor(.systemBackground, for: .normal)
         createButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         createButton.contentHorizontalAlignment = .center
@@ -260,11 +303,11 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
         var daysOfWeek: [DaysOfWeek] = []
         
         switch selectedDaysOfWeek {
-        case "Каждый день":
+        case Constants.allDaysText:
             daysOfWeek = [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]
-        case "Рабочие дни":
+        case Constants.workingDaysText:
             daysOfWeek = [.monday, .tuesday, .wednesday, .thursday, .friday]
-        case "Выходные дни":
+        case Constants.weekendDaysText:
             daysOfWeek = [.saturday, .sunday]
         default:
             daysOfWeek = selectedDaysOfWeek
@@ -293,6 +336,21 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
         UIView.animate(withDuration: 0.3) {
             self.createButton.backgroundColor = shouldBeActive ? .ypBlack : .ypGray
         }
+    }
+    
+    private func showDuplicateAlert() {
+        
+        let titleOfErrorAlert = NSLocalizedString("title_of_error_alert_on_newHabit_page", comment: "")
+        let messageOfErrorAlert = NSLocalizedString("message_of_error_alert_on_newHabit_page", comment: "")
+        let textOfButtonOnErrorAlert = NSLocalizedString("text_of_button_on_error_alert_on_newHabit_page", comment: "")
+        
+        let alert = UIAlertController(
+            title: titleOfErrorAlert,
+            message: messageOfErrorAlert,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: textOfButtonOnErrorAlert, style: .default))
+        present(alert, animated: true)
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -393,8 +451,17 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
                 self.isDaysSelected = !days.isEmpty
                 updateCreateButtonState()
                 
-                let workingDays: [String] = ["Пн", "Вт", "Ср", "Чт", "Пт"]
-                let weekendDays: [String] = ["Сб", "Вс"]
+                let workingDays: [String] = [
+                    DaysOfWeek.monday.localized,
+                    DaysOfWeek.tuesday.localized,
+                    DaysOfWeek.wednesday.localized,
+                    DaysOfWeek.thursday.localized,
+                    DaysOfWeek.friday.localized]
+                
+                let weekendDays: [String] = [
+                    DaysOfWeek.saturday.localized,
+                    DaysOfWeek.sunday.localized
+                ]
                 
                 var daysString: String
                 
@@ -402,11 +469,11 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
                 let isWeekendDays = weekendDays.allSatisfy { days.contains($0)}
                 
                 if days.count == 7 {
-                    daysString = "Каждый день"
+                    daysString = Constants.allDaysText
                 } else if isWorkingDays {
-                    daysString = "Рабочие дни"
+                    daysString = Constants.workingDaysText
                 } else if isWeekendDays {
-                    daysString = "Выходные дни"
+                    daysString = Constants.weekendDaysText
                 } else {
                     daysString = days.joined(separator: ", ")
                 }
@@ -473,7 +540,14 @@ extension NewHabitViewController: UICollectionViewDataSource {
             return UICollectionReusableView()
         }
         
-        view.configure(title: collectionView == collectionViewForEmojis ? "Emoji" : "Цвет", leadingInset: 28)
+        let headerTextOfCollectionViewForEmojis = NSLocalizedString("header_of_collectionViewForEmojis_on_newHabit_page", comment: "")
+        let headerTextOfCollectionViewForColors = NSLocalizedString("header_of_collectionViewForColors_on_newhabit_page", comment: "")
+        
+        view.configure(title: collectionView ==
+                       collectionViewForEmojis
+                       ? headerTextOfCollectionViewForEmojis
+                       : headerTextOfCollectionViewForColors,
+                       leadingInset: 28)
         
         return view
     }

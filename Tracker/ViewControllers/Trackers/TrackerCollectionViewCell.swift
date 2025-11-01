@@ -42,7 +42,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         trackerView.backgroundColor = tracker.color
         emojiLabel.text = tracker.emoji
         trackerLabel.text = tracker.name
-        quantityLabel.text = "\(count) \(visualizeCountText(count: count))"
+        quantityLabel.text = "\(visualizeCountText(count: count))"
         
         visualizeQuantityAddButton()
     }
@@ -172,13 +172,9 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func visualizeCountText(count: Int) -> String {
-        switch count {
-        case 1:
-            return "день"
-        case 2...4:
-            return "дня"
-        default:
-            return "дней"
-        }
+        let numberOfDays = String.localizedStringWithFormat(
+            NSLocalizedString("numberOfDays", comment: "Count of days when trecker is completed"),
+            count)
+        return numberOfDays
     }
 }

@@ -13,7 +13,16 @@ final class ScheduleViewController: UIViewController {
 
     var onDaysSelected: (([String]) -> Void)?
     
-    private let daysOfWeek: [String] = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+    private let daysOfWeek: [String] = {
+        return [
+            Constants.mondayFullText,
+            Constants.tuesdayFullText,
+            Constants.wednesdayFullText,
+            Constants.thursdayFullText,
+            Constants.fridayFullText,
+            Constants.saturdayFullText,
+            Constants.sundayFullText]
+    }()
     
     private lazy var tableViewWithDaysOfWeek: UITableView = makeTableViewWithDaysOfWeek()
     private lazy var readyButton: UIButton = makeReadyButton()
@@ -22,7 +31,10 @@ final class ScheduleViewController: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = .systemBackground
-        title = "Расписание"
+        
+        let titleSchedulePage = NSLocalizedString("title_of_scheduleViewController", comment: "")
+        
+        title = titleSchedulePage
         
         setupTableViewWithDaysOfWeek()
         addSubViews()
@@ -35,19 +47,19 @@ final class ScheduleViewController: UIViewController {
         
         switch index {
         case 0:
-            shortDay = "Пн"
+            shortDay = DaysOfWeek.monday.localized
         case 1:
-            shortDay = "Вт"
+            shortDay = DaysOfWeek.tuesday.localized
         case 2:
-            shortDay = "Ср"
+            shortDay = DaysOfWeek.wednesday.localized
         case 3:
-            shortDay = "Чт"
+            shortDay = DaysOfWeek.thursday.localized
         case 4:
-            shortDay = "Пт"
+            shortDay = DaysOfWeek.friday.localized
         case 5:
-            shortDay = "Сб"
+            shortDay = DaysOfWeek.saturday.localized
         case 6:
-            shortDay = "Вс"
+            shortDay = DaysOfWeek.sunday.localized
         default:
             break
         }
@@ -73,12 +85,16 @@ final class ScheduleViewController: UIViewController {
             onDaysSelected?(selectedDays)
             dismiss(animated: true)
         } else {
+            
+            let titleOfErrorAlert = NSLocalizedString("title_of_error_alert_on_schedule_page", comment: "")
+            let textOfButtonOnErrorAlert = NSLocalizedString("text_of_button_on_error_alert_on_schedule_page", comment: "")
+            
             let alert = UIAlertController(
-                title: "Надо выбрать хотябы бы один день",
+                title: titleOfErrorAlert,
                 message: nil,
                 preferredStyle: .alert
             )
-            let action = UIAlertAction(title: "Ок", style: .default, handler: nil)
+            let action = UIAlertAction(title: textOfButtonOnErrorAlert, style: .default, handler: nil)
             alert.addAction(action)
             DispatchQueue.main.async {
                 self.present(alert, animated: true)
@@ -130,7 +146,10 @@ final class ScheduleViewController: UIViewController {
     
     private func makeReadyButton() -> UIButton {
         let readyButton = UIButton(type: .custom)
-        readyButton.setTitle("Готово", for: .normal)
+        
+        let textOfReadyButton = NSLocalizedString("text_of_readyButton_on_schedule_page", comment: "")
+        
+        readyButton.setTitle(textOfReadyButton, for: .normal)
         readyButton.setTitleColor(.systemBackground, for: .normal)
         readyButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         readyButton.contentHorizontalAlignment = .center
@@ -143,7 +162,7 @@ final class ScheduleViewController: UIViewController {
     }
     
     private func sortDaysOfWeek() {
-        let rightSortedDays: [String] = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+        let rightSortedDays: [String] = DaysOfWeek.allCases.map { $0.localized }
         
         let sortedDaysOfWeek = selectedDays.sorted() {
             guard let firstIndex = rightSortedDays.firstIndex(of: $0),

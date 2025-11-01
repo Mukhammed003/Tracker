@@ -8,13 +8,11 @@
 import UIKit
 
 enum DaysOfWeek: String, CaseIterable, Codable {
-    case monday = "Пн"
-    case tuesday = "Вт"
-    case wednesday = "Ср"
-    case thursday = "Чт"
-    case friday = "Пт"
-    case saturday = "Сб"
-    case sunday = "Вс"
+    case monday, tuesday, wednesday, thursday, friday, saturday, sunday
+    
+    var localized: String {
+        NSLocalizedString("daysOfWeek_case_\(rawValue)", comment: "")
+    }
 }
 
 enum NewTrackerSetup {
@@ -68,6 +66,18 @@ final class Constants {
     static let identifierOfHeaderForTrackerCollectionView = "headerForTrackerCollectionView"
     static let identifierOfHeaderForEmojiCollectionView = "headerForEmojiCollectionView"
     static let identifierOfHeaderForColorCollectionView = "headerForColorCollectionView"
+    
+    static let mondayFullText = NSLocalizedString("monday_on_schedule_page", comment: "")
+    static let tuesdayFullText = NSLocalizedString("tuesday_on_schedule_page", comment: "")
+    static let wednesdayFullText = NSLocalizedString("wednesday_on_schedule_page", comment: "")
+    static let thursdayFullText = NSLocalizedString("thursday_on_schedule_page", comment: "")
+    static let fridayFullText = NSLocalizedString("friday_on_schedule_page", comment: "")
+    static let saturdayFullText = NSLocalizedString("saturday_on_schedule_page", comment: "")
+    static let sundayFullText = NSLocalizedString("sunday_on_schedule_page", comment: "")
+    
+    static let allDaysText = NSLocalizedString("text_for_daysOfWeek_allDays", comment: "")
+    static let workingDaysText = NSLocalizedString("text_for_daysOfWeek_workingDays", comment: "")
+    static let weekendDaysText = NSLocalizedString("text_for_daysOfWeek_weekendDays", comment: "")
 }
 
 

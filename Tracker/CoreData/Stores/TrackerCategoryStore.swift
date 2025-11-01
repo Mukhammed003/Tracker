@@ -115,6 +115,23 @@ final class TrackerCategoryStore: NSObject {
         return objects.compactMap { try? trackerCategory(from: $0) }
     }
     
+    func isExistsSuchCategory(withHeader header: String) -> Bool {
+        guard let objects = fetchedResultController?.fetchedObjects else { return false }
+        
+        return objects.contains(where: { $0.header == header })
+    }
+    
+    func isExistsSuchTrackerInCategory(withHeader header: String, withTracker trackerName: String) -> Bool {
+        guard let categories = fetchedResultController?.fetchedObjects else { return false }
+
+        guard let category = categories.first(where: { $0.header == header }),
+              let trackers = category.listOfTrackers as? Set<TrackerCoreData> else {
+            return false
+        }
+
+        return trackers.contains { $0.name == trackerName }
+    }
+    
     private func trackerCategory(from trackerCategoryCoreData: TrackerCategoryCoreData) throws -> TrackerCategory {
         guard let header = trackerCategoryCoreData.header else {
             throw TrackerCategoryStoreError.decodingErrorInvalidHeader

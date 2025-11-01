@@ -37,4 +37,7 @@ final class CategoryViewModel {
         return categories[index].header
     }
     
+    func isCategoryExists(_ name: String) -> Bool {
+        return categoryStore.isExistsSuchCategory(withHeader: name)
+    }
 }

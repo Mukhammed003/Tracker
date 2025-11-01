@@ -24,15 +24,21 @@ final class TabBarController: UITabBarController {
     private func setUpTabs() {
         let trackerViewController = TrackersViewController()
         let firstNav = UINavigationController(rootViewController: trackerViewController)
+        
+        let titleOfFirstTabBarItem = NSLocalizedString("title_of_firstTabBarItem", comment: "")
+        
         firstNav.tabBarItem = UITabBarItem(
-            title: "Трекеры",
+            title: titleOfFirstTabBarItem,
             image: UIImage(resource: .tabTrackersActive),
             selectedImage: nil)
         
         let statisticsViewController = StatisticsViewController()
         let secondNav = UINavigationController(rootViewController: statisticsViewController)
+        
+        let titleOfSecondTabBarItem = NSLocalizedString("title_of_secondTabBarItem", comment: "")
+        
         secondNav.tabBarItem = UITabBarItem(
-            title: "Статистика",
+            title: titleOfSecondTabBarItem,
             image: .tabStatisticsActive,
             selectedImage: nil)
         

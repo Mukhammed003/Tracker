@@ -56,48 +56,53 @@ final class SecondOnboardingViewController: UIViewController {
     }
     
     private func makeOnboardingLabel() -> UILabel {
-        let exampleLabel = UILabel()
+        let onboardingLabel = UILabel()
         
-        exampleLabel.translatesAutoresizingMaskIntoConstraints = false
+        onboardingLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        let onboardingText = NSLocalizedString("text_on_second_onboarding_page", comment: "")
         
         let attributedString = NSAttributedString(
-            string: "Даже если это не литры воды и йога",
+            string: onboardingText,
             attributes: [
                 .kern: 0,
                 .foregroundColor: UIColor.ypBlack,
                 .font: UIFont.systemFont(ofSize: 32, weight: .bold)
             ]
         )
-        exampleLabel.attributedText = attributedString
+        onboardingLabel.attributedText = attributedString
         
-        exampleLabel.textAlignment = .center
-        exampleLabel.numberOfLines = 2
-        exampleLabel.lineBreakMode = .byWordWrapping
+        onboardingLabel.textAlignment = .center
+        onboardingLabel.numberOfLines = 2
+        onboardingLabel.lineBreakMode = .byWordWrapping
         
-        return exampleLabel
+        return onboardingLabel
     }
     
     private func makeBackgroundImage() -> UIImageView {
         let exampleImage = UIImage(resource: .secondOnboardingBackground)
-        let exampleImageView = UIImageView(image: exampleImage)
-        exampleImageView.clipsToBounds = true
+        let backgroundImageView = UIImageView(image: exampleImage)
+        backgroundImageView.clipsToBounds = true
         
-        exampleImageView.translatesAutoresizingMaskIntoConstraints = false
+        backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
         
-        return exampleImageView
+        return backgroundImageView
     }
     
     private func makeOnboardingButton() -> UIButton {
-        let readyButton = UIButton(type: .custom)
-        readyButton.setTitle("Вот это технологии!", for: .normal)
-        readyButton.setTitleColor(.systemBackground, for: .normal)
-        readyButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
-        readyButton.contentHorizontalAlignment = .center
-        readyButton.backgroundColor = .ypBlack
-        readyButton.layer.cornerRadius = 16
-        readyButton.addTarget(self, action: #selector(clickToOnboardingButton), for: .touchUpInside)
-        readyButton.translatesAutoresizingMaskIntoConstraints = false
+        let onboardingButton = UIButton(type: .custom)
         
-        return readyButton
+        let textOfOnboardingButton = NSLocalizedString("button_text_on_onboarding_pages", comment: "")
+        
+        onboardingButton.setTitle(textOfOnboardingButton, for: .normal)
+        onboardingButton.setTitleColor(.systemBackground, for: .normal)
+        onboardingButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        onboardingButton.contentHorizontalAlignment = .center
+        onboardingButton.backgroundColor = .ypBlack
+        onboardingButton.layer.cornerRadius = 16
+        onboardingButton.addTarget(self, action: #selector(clickToOnboardingButton), for: .touchUpInside)
+        onboardingButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        return onboardingButton
     }
 }

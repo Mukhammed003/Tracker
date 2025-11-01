@@ -11,6 +11,7 @@ final class CategoryViewController: UIViewController {
     
     var onCategorySelected: ((String) -> Void)?
     
+    
     private let viewModel: CategoryViewModel
     
     private lazy var tableViewWithCategories: UITableView = makeTableViewWithCategories()
@@ -32,7 +33,10 @@ final class CategoryViewController: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = .systemBackground
-        title = "Категория"
+        
+        let titleOfCategoryViewController = NSLocalizedString("title_of_categoryViewController", comment: "")
+        
+        title = titleOfCategoryViewController
         
         setupTableViewWithCategories()
         addSubViews()
@@ -50,7 +54,7 @@ final class CategoryViewController: UIViewController {
     @objc private func buttonAddCategoryClicked() {
         print("Кнопка добавить категорию нажата")
         
-        let newCategoryVc = NewCategoryViewController()
+        let newCategoryVc = NewCategoryViewController(viewModel: viewModel)
         
         newCategoryVc.onNewCategoryCreated = { [weak self] newCategory in
             self?.viewModel.addCategory(newCategory)
@@ -153,7 +157,10 @@ final class CategoryViewController: UIViewController {
     
     private func makeAddCategoryButton() -> UIButton {
         let addCategoryButton = UIButton(type: .custom)
-        addCategoryButton.setTitle("Добавить категорию", for: .normal)
+        
+        let textOfAddCategoryButton = NSLocalizedString("text_of_addCategoryButton_on_category_page", comment: "")
+        
+        addCategoryButton.setTitle(textOfAddCategoryButton, for: .normal)
         addCategoryButton.setTitleColor(.systemBackground, for: .normal)
         addCategoryButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         addCategoryButton.contentHorizontalAlignment = .center
@@ -189,8 +196,10 @@ final class CategoryViewController: UIViewController {
         notFoundLabel.lineBreakMode = .byWordWrapping
         notFoundLabel.textAlignment = .center
         
+        let notFoundLabelText = NSLocalizedString("text_of_notFoundLabel_on_category_page", comment: "")
+        
         let attributedString = NSAttributedString(
-            string: "Привычки и события можно объединить по смыслу",
+            string: notFoundLabelText,
             attributes: [
                 .kern: 0,
                 .foregroundColor: UIColor.ypBlack,
