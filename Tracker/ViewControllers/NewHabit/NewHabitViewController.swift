@@ -312,7 +312,7 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
         default:
             daysOfWeek = selectedDaysOfWeek
                 .components(separatedBy: ", ")
-                .compactMap{ (DaysOfWeek(rawValue: $0)) }
+                .compactMap{ DaysOfWeek.fromLocalized($0) }
         }
         
         return daysOfWeek

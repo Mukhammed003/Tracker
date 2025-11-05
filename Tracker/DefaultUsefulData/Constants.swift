@@ -79,5 +79,3 @@ final class Constants {
     static let workingDaysText = NSLocalizedString("text_for_daysOfWeek_workingDays", comment: "")
     static let weekendDaysText = NSLocalizedString("text_for_daysOfWeek_weekendDays", comment: "")
 }
-
-

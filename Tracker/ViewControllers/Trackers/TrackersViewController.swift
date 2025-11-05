@@ -7,12 +7,13 @@
 
 import UIKit
 
-final class TrackersViewController: UIViewController, UICollectionViewDelegate {
+final class TrackersViewController: UIViewController, UICollectionViewDelegate, UISearchResultsUpdating {
     
     private lazy var categories: [TrackerCategory] = []
     private var completedTrackers: Set<TrackerRecord> = []
     private var needTrackersByDate: [TrackerCategory] = []
-    private var currentDate: Date = Date().startOfDay
+    private var needTrackersForSelector: [TrackerCategory] = []
+    private var currentDate: Date = Date().startOfDayUTC
     
     private let collectionViewForTrackers = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
@@ -32,10 +33,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         
         view.backgroundColor = .ypWhite
         
-        trackerCategoryStore.delegate = self
-        trackerRecordStore.delegate = self
-        trackerStore.delegate = self
-        loadTrackersFromCoreData()
+        setupCoreDataStoresAndLoadData()
         
         setupNavBar()
         setupCollectionView()
@@ -45,20 +43,25 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         showNeedScreen()
     }
     
-    func handlerForTrackerCompletion(trackerID: UInt, isCompleted: Bool) {
-        if isCompleted {
-            trackerCompleted(trackerID: trackerID)
-        } else {
-            trackerUncompleted(trackerID: trackerID)
+    func updateSearchResults(for searchController: UISearchController) {
+        guard let searchText = searchController.searchBar.text,
+              !searchText.isEmpty else  {
+            needTrackersForSelector = needTrackersByDate
+            collectionViewForTrackers.reloadData()
+            return
         }
         
-//        for (sectionIndex, trackerCategory) in needTrackersByDate.enumerated() {
-//            if let rowIndex = trackerCategory.listOfTrackers.firstIndex(where: {$0.id == trackerID}) {
-//                let indexPath = IndexPath(row: rowIndex, section: sectionIndex)
-//                collectionViewForTrackers.reloadItems(at: [indexPath])
-//                break
-//            }
-//        }
+        let lowercasedSearchText = searchText.lowercased()
+        
+        needTrackersForSelector = needTrackersByDate.compactMap { category in
+            let filteredTrackers = category.listOfTrackers.filter {
+                $0.name.lowercased().contains(lowercasedSearchText)
+            }
+            
+            return filteredTrackers.isEmpty ? nil : TrackerCategory(header: category.header, listOfTrackers: filteredTrackers)
+        }
+        
+        collectionViewForTrackers.reloadData()
     }
     
     @objc private func clickToAddTrackerButton() {
@@ -107,10 +110,25 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     }
     
     @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
-        currentDate = sender.date
+        currentDate = sender.date.startOfDayUTC
         
         filterTrackersByDate()
         showNeedScreen()
+    }
+    
+    private func handlerForTrackerCompletion(trackerID: UInt, isCompleted: Bool) {
+        if isCompleted {
+            trackerCompleted(trackerID: trackerID)
+        } else {
+            trackerUncompleted(trackerID: trackerID)
+        }
+    }
+    
+    private func setupCoreDataStoresAndLoadData() {
+        trackerCategoryStore.delegate = self
+        trackerRecordStore.delegate = self
+        trackerStore.delegate = self
+        loadTrackersFromCoreData()
     }
     
     private func showNeedScreen() {
@@ -310,13 +328,15 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = placeholderText
         
+        searchController.searchResultsUpdater = self
+        
         return searchController
     }
     
     private func trackerCompleted(trackerID: UInt) {
         
         let selectedDate = currentDate
-        let todaysDate = Date().startOfDay
+        let todaysDate = Date().startOfDayUTC
         
         if selectedDate > todaysDate {
             print("Нельзя добавлять будущие даты")
@@ -367,6 +387,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         }
         
         needTrackersByDate = needTrackerCategory.sorted { $0.header < $1.header}
+        needTrackersForSelector = needTrackersByDate
     }
     
     private func loadTrackersFromCoreData() {
@@ -406,18 +427,18 @@ extension TrackersViewController: TrackerStoreDelegate, TrackerRecordStoreDelega
 extension TrackersViewController: UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        needTrackersByDate.count
+        needTrackersForSelector.count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        needTrackersByDate[section].listOfTrackers.count
+        needTrackersForSelector[section].listOfTrackers.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Constants.trackerCollectionViewCellIdentifier, for: indexPath) as? TrackerCollectionViewCell else {
             return UICollectionViewCell()
         }
-        let tracker = needTrackersByDate[indexPath.section].listOfTrackers[indexPath.row]
+        let tracker = needTrackersForSelector[indexPath.section].listOfTrackers[indexPath.row]
         
         let selectedDate = currentDate
         let trackerRecord = TrackerRecord(id: tracker.id, date: selectedDate)
@@ -442,7 +463,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         }
         
         let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: id, for: indexPath) as! SupplementaryView
-        view.configure(title: needTrackersByDate[indexPath.section].header, leadingInset: 12)
+        view.configure(title: needTrackersForSelector[indexPath.section].header, leadingInset: 12)
         return view
     } 
 }
