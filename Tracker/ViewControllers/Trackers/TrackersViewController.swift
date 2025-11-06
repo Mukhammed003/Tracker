@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class TrackersViewController: UIViewController, UICollectionViewDelegate, UISearchResultsUpdating {
+final class TrackersViewController: UIViewController {
     
     private lazy var categories: [TrackerCategory] = []
     private var completedTrackers: Set<TrackerRecord> = []
@@ -43,34 +43,13 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate, 
         showNeedScreen()
     }
     
-    func updateSearchResults(for searchController: UISearchController) {
-        guard let searchText = searchController.searchBar.text,
-              !searchText.isEmpty else  {
-            needTrackersForSelector = needTrackersByDate
-            collectionViewForTrackers.reloadData()
-            return
-        }
-        
-        let lowercasedSearchText = searchText.lowercased()
-        
-        needTrackersForSelector = needTrackersByDate.compactMap { category in
-            let filteredTrackers = category.listOfTrackers.filter {
-                $0.name.lowercased().contains(lowercasedSearchText)
-            }
-            
-            return filteredTrackers.isEmpty ? nil : TrackerCategory(header: category.header, listOfTrackers: filteredTrackers)
-        }
-        
-        collectionViewForTrackers.reloadData()
-    }
-    
     @objc private func clickToAddTrackerButton() {
-        let newHabitVc = NewHabitViewController()
+        let newHabitVc = NewHabitViewController(mode: .create)
         newHabitVc.categories = self.categories
         
         newHabitVc.isCategoryExists = { [weak self] categoryName in
             return self?.trackerCategoryStore.isExistsSuchCategory(withHeader: categoryName) ?? false
-            }
+        }
         
         let navController = UINavigationController(rootViewController: newHabitVc)
         navController.modalPresentationStyle = .pageSheet
@@ -81,29 +60,18 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate, 
             let newTrackerCategory = trackerCategory[0]
             let newTracker = newTrackerCategory.listOfTrackers[0]
             
-            if trackerCategoryStore.isExistsSuchTrackerInCategory(withHeader: newTrackerCategory.header, withTracker: newTracker.name) {
+            if trackerCategoryStore.isExistsSuchTrackerInCategory(
+                withHeader: newTrackerCategory.header,
+                withTracker: newTracker.name)
+            {
                 completion(.failure(.duplicate))
                 return
             }
+            trackerCategoryStore.addToExistingTrackerCategory(newTracker: newTrackerCategory.listOfTrackers[0], header: newTrackerCategory.header)
             
-            if let index = categories.firstIndex(where: {$0.header == newTrackerCategory.header}) {
-                
-                let existingCategory = categories[index]
-                let updatedTrackers = existingCategory.listOfTrackers + newTrackerCategory.listOfTrackers
-                
-                let updatedCategory = TrackerCategory(header: existingCategory.header, listOfTrackers: updatedTrackers)
-                
-                categories = categories.enumerated().map { idx, cat in
-                    idx == index ? updatedCategory : cat
-                }
-                
-                print("Обновили существующую категорию: \(categories)")
-                
-                trackerCategoryStore.addToExistingTrackerCategory(newTracker: newTrackerCategory.listOfTrackers[0], header: existingCategory.header)
-            }
+            print("Обновили существующую категорию: \(categories)")
+            
             completion(.success(()))
-            filterTrackersByDate()
-            showNeedScreen()
         }
         
         present(navController, animated: true)
@@ -405,6 +373,107 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate, 
             self.showNeedScreen()
         }
     }
+    
+    // For context menu process
+    
+    private func showDeleteAlert(for trackerId: Int64, header: String) {
+        
+        let titleOfDeleteAlert = NSLocalizedString("title_of_deleteAlert_on_trackerViewController", comment: "")
+        let textOfDeleteButton = NSLocalizedString("deleteButton_of_deleteAlert_on_trackerViewController", comment: "")
+        let textOfCancelButton = NSLocalizedString("cancelButton_of_deleteAlert_on_trackerViewController", comment: "")
+        
+        
+        let alert = UIAlertController(
+            title: titleOfDeleteAlert,
+            message: nil,
+            preferredStyle: .actionSheet
+        )
+        
+        let deleteAction = UIAlertAction(title: textOfDeleteButton, style: .destructive) { [weak self] _ in
+            self?.deleteTracker(trackerId: trackerId, header: header)
+        }
+        
+        let cancelAction = UIAlertAction(title: textOfCancelButton, style: .cancel)
+        
+        alert.addAction(deleteAction)
+        alert.addAction(cancelAction)
+        
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = self.view
+            popover.sourceRect = CGRect(
+                x: self.view.bounds.midX,
+                y: self.view.bounds.midY,
+                width: 0,
+                height: 0
+            )
+            popover.permittedArrowDirections = []
+        }
+        
+        present(alert, animated: true)
+    }
+    
+    private func openEditingPageForTracker(
+        tracker: Tracker,
+        headerOfCategory: String,
+        textCountOfCompletedDays: String
+    ) {
+        print("Нажали на редактировать в контекстном меню трекера")
+        
+        let editTrackerVc = NewHabitViewController(
+            mode: .edit(
+                existingTracker: tracker,
+                headerOfCategory: headerOfCategory,
+                textCountOfCompletedDays: textCountOfCompletedDays
+            )
+        )
+        
+        let navVc = UINavigationController(rootViewController: editTrackerVc)
+        navVc.modalPresentationStyle = .pageSheet
+        
+        editTrackerVc.onEdit = { [weak self] trackerCategory, oldCategoryName in
+            guard let self = self else { return }
+            
+            guard let oldCategoryName = oldCategoryName else { return }
+            
+            let newTrackerCategory = trackerCategory[0]
+            let newTracker = newTrackerCategory.listOfTrackers[0]
+                
+            self.trackerCategoryStore.updateTrackerInSuchCategory(
+                categoryName: newTrackerCategory.header,
+                tracker: newTracker,
+                oldCategoryName: oldCategoryName)
+        }
+        
+        present(navVc, animated: true)
+    }
+    
+    private func deleteTracker(trackerId: Int64, header: String) {
+        trackerCategoryStore.deleteTrackerInSuchCategory(trackerId: trackerId, header: header)
+    }
+}
+
+extension TrackersViewController: UISearchResultsUpdating {
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        guard let searchText = searchController.searchBar.text,
+              !searchText.isEmpty else  {
+            needTrackersForSelector = needTrackersByDate
+            collectionViewForTrackers.reloadData()
+            return
+        }
+        
+        let lowercasedSearchText = searchText.lowercased()
+        
+        needTrackersForSelector = needTrackersByDate.compactMap { category in
+            let filteredTrackers = category.listOfTrackers.filter {
+                $0.name.lowercased().contains(lowercasedSearchText)
+            }
+            
+            return filteredTrackers.isEmpty ? nil : TrackerCategory(header: category.header, listOfTrackers: filteredTrackers)
+        }
+        
+        collectionViewForTrackers.reloadData()
+    }
 }
 
 extension TrackersViewController: TrackerStoreDelegate, TrackerRecordStoreDelegate, TrackerCategoryStoreDelegate {
@@ -423,7 +492,6 @@ extension TrackersViewController: TrackerStoreDelegate, TrackerRecordStoreDelega
     
 }
 
-
 extension TrackersViewController: UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -438,6 +506,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Constants.trackerCollectionViewCellIdentifier, for: indexPath) as? TrackerCollectionViewCell else {
             return UICollectionViewCell()
         }
+        let headerOfCategory = needTrackersForSelector[indexPath.section].header
         let tracker = needTrackersForSelector[indexPath.section].listOfTrackers[indexPath.row]
         
         let selectedDate = currentDate
@@ -446,9 +515,25 @@ extension TrackersViewController: UICollectionViewDataSource {
         
         let count = completedTrackers.filter( {$0.id == tracker.id} ).count
         
-        cell.configure(tracker: tracker, isCompleted: isCompleted, count: count) { [weak self] trackerID, isCompletedTracker in
-            self?.handlerForTrackerCompletion(trackerID: trackerID, isCompleted: isCompletedTracker)
-        }
+        let numberOfDays = String.localizedStringWithFormat(
+            NSLocalizedString("numberOfDays", comment: "Count of days when trecker is completed"),
+            count)
+        
+        cell.configure(
+            tracker: tracker,
+            isCompleted: isCompleted,
+            count: count,
+            completionHandler: { [weak self] trackerID, isCompletedTracker in
+                self?.handlerForTrackerCompletion(trackerID: trackerID, isCompleted: isCompletedTracker)
+            },
+            menuHandler: { [weak self] trackerID, action in
+                switch action {
+                case .edit:
+                    self?.openEditingPageForTracker(tracker: tracker, headerOfCategory: headerOfCategory, textCountOfCompletedDays: numberOfDays)
+                case .delete:
+                    self?.showDeleteAlert(for: Int64(trackerID), header: headerOfCategory)
+                }
+            })
         
         return cell
     }

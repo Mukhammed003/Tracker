@@ -11,7 +11,15 @@ enum TreckerCreationError: Error {
     case duplicate
 }
 
+enum HabitMode {
+    case create
+    case edit(existingTracker: Tracker, headerOfCategory: String, textCountOfCompletedDays: String)
+}
+
 final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICollectionViewDelegate {
+    
+    private let mode: HabitMode
+    
     private let listOfSections: [String] = {
         
         let textForCategorySection = NSLocalizedString("text_of_category_section_on_newHabit_page", comment: "")
@@ -27,6 +35,7 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     
     var isCategoryExists: ((String) -> Bool)?
     var onCreate: (([TrackerCategory], @escaping (Result<Void, TreckerCreationError>) -> Void) -> Void)?
+    var onEdit: (([TrackerCategory], String?) -> Void)?
     
     private var isTextFieldFilled = false
     private var isDaysSelected = false
@@ -34,8 +43,12 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     private var isColorSelected = false
     private var isCategorySelected = false
     
-    private var needEmoji: String = ""
-    private var needColor: UIColor = .systemBackground
+    private var oldCategoryName: String? // Update to new category, we need to delete in old category and add to new category
+    
+    private var selectedEmoji: String? // For edit mode of HabitController
+    private var selectedColor: UIColor? // For edit mode of HabitController
+    private var selectedCategoryTitle: String? // For edit mode of HabitController
+    private var selectedScheduleText: String? // For edit mode of HabitController
     
     private let scrollView = UIScrollView() // For scroll
     private let contentView = UIView() // For scroll
@@ -43,10 +56,20 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     private let collectionViewForEmojis = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     private let collectionViewForColors = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
+    private lazy var editInfoLabel: UILabel = makeEditInfoLabel()
     private lazy var trackerNameTextField: UITextField = makeTrackerNameTextField()
     private lazy var tableViewWithSections: UITableView = makeTableViewWithSections()
     private lazy var cancelButton: UIButton = makeCancelButton()
     private lazy var createButton: UIButton = makeCreateButton()
+    
+    init(mode: HabitMode) {
+        self.mode = mode
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -61,6 +84,7 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
         addSubViews()
         addConstraints()
         setupCollectionViews()
+        applyMode()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -79,43 +103,118 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     }
     
     @objc private func createButtonClicked() {
-        print("Кнопка создать нажата")
-        
-        guard let trackerNameText = trackerNameTextField.text else {
-            return
-        }
-        let selectedDaysOfWeek: [DaysOfWeek]? = returnSelectedDaysOfWeek()
-        let newTrackerId: UInt = findTheLastIdOfTracker() + 1
-        guard let selectedCategoryName = returnCategoryName() else { return }
-        
-        let newTracker: Tracker =
-        Tracker(
-            id: newTrackerId,
-            name: trackerNameText,
-            color: needColor,
-            emoji: needEmoji,
-            schedule: selectedDaysOfWeek)
-        
-        let newTrackerCategory: [TrackerCategory] = [
-            TrackerCategory(
-                header: selectedCategoryName,
-                listOfTrackers: [newTracker]
-            )
-        ]
-        
-        onCreate?(newTrackerCategory) {[weak self] result in
-            switch result {
-            case .success:
-                self?.dismiss(animated: true)
-            case .failure(.duplicate):
-                self?.showDuplicateAlert()
+        switch mode {
+        case .create:
+            print("Кнопка создать нажата")
+            
+            guard let trackerNameText = trackerNameTextField.text else {
+                return
             }
+            let selectedDaysOfWeek: [DaysOfWeek]? = returnSelectedDaysOfWeek()
+            let newTrackerId: UInt = findTheLastIdOfTracker() + 1
+            guard let selectedCategoryName = returnCategoryName(),
+                  let selectedColor = selectedColor,
+                  let selectedEmoji = selectedEmoji else { return }
+            
+            let newTracker: Tracker =
+            Tracker(
+                id: newTrackerId,
+                name: trackerNameText,
+                color: selectedColor,
+                emoji: selectedEmoji,
+                schedule: selectedDaysOfWeek)
+            
+            let newTrackerCategory: [TrackerCategory] = [
+                TrackerCategory(
+                    header: selectedCategoryName,
+                    listOfTrackers: [newTracker]
+                )
+            ]
+            
+            onCreate?(newTrackerCategory) {[weak self] result in
+                switch result {
+                case .success:
+                    self?.dismiss(animated: true)
+                case .failure(.duplicate):
+                    self?.showDuplicateAlert()
+                }
+            }
+        case .edit(let tracker, _, _):
+            print("Кнопка сохранить нажата")
+            
+            guard let trackerNameText = trackerNameTextField.text else {
+                return
+            }
+            let selectedDaysOfWeek: [DaysOfWeek]? = returnSelectedDaysOfWeek()
+            guard let selectedCategoryName = returnCategoryName(),
+                  let selectedColor = selectedColor,
+                  let selectedEmoji = selectedEmoji else { return }
+            
+            let newTracker: Tracker =
+            Tracker(
+                id: tracker.id,
+                name: trackerNameText,
+                color: selectedColor,
+                emoji: selectedEmoji,
+                schedule: selectedDaysOfWeek)
+            
+            let newTrackerCategory: [TrackerCategory] = [
+                TrackerCategory(
+                    header: selectedCategoryName,
+                    listOfTrackers: [newTracker]
+                )
+            ]
+            
+            onEdit?(newTrackerCategory, oldCategoryName)
+            self.dismiss(animated: true)
         }
     }
     
     @objc private func textFieldDidChange(_ textField: UITextField) {
         isTextFieldFilled = !(textField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
         updateCreateButtonState()
+    }
+    
+    private func applyMode() {
+        switch mode {
+        case .create:
+            let titleOfNewHabitViewController = NSLocalizedString("title_of_newHabitViewController", comment: "")
+            let textOfCreateButton = NSLocalizedString("title_of_createButton_on_newHabit_page", comment: "")
+            
+            title = titleOfNewHabitViewController
+            createButton.setTitle(textOfCreateButton, for: .normal)
+            editInfoLabel.isHidden = true
+            
+        case .edit(let tracker, let headerOfCategory, let textCountOfCompletedDays):
+            let titleOfEditHabitViewController = NSLocalizedString("title_of_editHabitViewController", comment: "")
+            let textOfCreateButton = NSLocalizedString("title_of_saveButton_on_editHabit_page", comment: "")
+            
+            title = titleOfEditHabitViewController
+            createButton.setTitle(textOfCreateButton, for: .normal)
+            editInfoLabel.isHidden = false
+            
+            let textOfScheduleDays = makeDaysOfWeekText(from: tracker.schedule)
+            
+            editInfoLabel.text = textCountOfCompletedDays
+            trackerNameTextField.text = tracker.name
+            
+            selectedEmoji = tracker.emoji
+            selectedColor = tracker.color
+            selectedCategoryTitle = headerOfCategory
+            selectedScheduleText = textOfScheduleDays
+            
+            oldCategoryName = headerOfCategory // If category will change, we need delete tracker in old category and create in new category
+            
+            collectionViewForEmojis.reloadData()
+            collectionViewForColors.reloadData()
+            
+            isTextFieldFilled = true
+            isDaysSelected = true
+            isEmojiSelected = true
+            isColorSelected = true
+            isCategorySelected = true
+            updateCreateButtonState()
+        }
     }
     
     private func setupTableViewWithSections() {
@@ -134,12 +233,13 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
         scrollView.showsVerticalScrollIndicator = true
         scrollView.alwaysBounceVertical = true
         
-        [trackerNameTextField, tableViewWithSections, collectionViewForEmojis, collectionViewForColors, cancelButton, createButton].forEach {
+        [editInfoLabel, trackerNameTextField, tableViewWithSections, collectionViewForEmojis, collectionViewForColors, cancelButton, createButton].forEach {
             contentView.addSubview($0)
         }
     }
     
     private func addConstraints() {
+        
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -150,41 +250,54 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
             contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            
-            trackerNameTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
-            trackerNameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            trackerNameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            trackerNameTextField.heightAnchor.constraint(equalToConstant: 75),
-            
-            tableViewWithSections.topAnchor.constraint(equalTo: trackerNameTextField.bottomAnchor, constant: 24),
-            tableViewWithSections.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            tableViewWithSections.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            tableViewWithSections.heightAnchor.constraint(equalToConstant: 150),
-            
-            collectionViewForEmojis.topAnchor.constraint(equalTo: tableViewWithSections.bottomAnchor, constant: 50),
-            collectionViewForEmojis.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            collectionViewForEmojis.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            collectionViewForEmojis.heightAnchor.constraint(equalToConstant: 204),
-            
-            collectionViewForColors.topAnchor.constraint(equalTo: collectionViewForEmojis.bottomAnchor, constant: 34),
-            collectionViewForColors.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            collectionViewForColors.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            collectionViewForColors.heightAnchor.constraint(equalToConstant: 204),
-            
-            cancelButton.heightAnchor.constraint(equalToConstant: 60),
-            cancelButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            cancelButton.topAnchor.constraint(equalTo: collectionViewForColors.bottomAnchor, constant: 16),
-            cancelButton.widthAnchor.constraint(equalToConstant: 166),
-            
-            createButton.heightAnchor.constraint(equalToConstant: 60),
-            createButton.leadingAnchor.constraint(equalTo: cancelButton.trailingAnchor, constant: 8),
-            createButton.topAnchor.constraint(equalTo: collectionViewForColors.bottomAnchor, constant: 16),
-            createButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            
-            createButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16)
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
         ])
+        
+        if case .edit = mode {
+            NSLayoutConstraint.activate([
+                editInfoLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
+                editInfoLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+                editInfoLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+                
+                trackerNameTextField.topAnchor.constraint(equalTo: editInfoLabel.bottomAnchor, constant: 40)
+            ])
+        } else {
+            NSLayoutConstraint.activate([
+                trackerNameTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24)
+            ])
+        }
+            NSLayoutConstraint.activate([
+                trackerNameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+                trackerNameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+                trackerNameTextField.heightAnchor.constraint(equalToConstant: 75),
+                
+                tableViewWithSections.topAnchor.constraint(equalTo: trackerNameTextField.bottomAnchor, constant: 24),
+                tableViewWithSections.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+                tableViewWithSections.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+                tableViewWithSections.heightAnchor.constraint(equalToConstant: 150),
+                
+                collectionViewForEmojis.topAnchor.constraint(equalTo: tableViewWithSections.bottomAnchor, constant: 50),
+                collectionViewForEmojis.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+                collectionViewForEmojis.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+                collectionViewForEmojis.heightAnchor.constraint(equalToConstant: 204),
+                
+                collectionViewForColors.topAnchor.constraint(equalTo: collectionViewForEmojis.bottomAnchor, constant: 34),
+                collectionViewForColors.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+                collectionViewForColors.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+                collectionViewForColors.heightAnchor.constraint(equalToConstant: 204),
+                
+                cancelButton.heightAnchor.constraint(equalToConstant: 60),
+                cancelButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                cancelButton.topAnchor.constraint(equalTo: collectionViewForColors.bottomAnchor, constant: 16),
+                cancelButton.widthAnchor.constraint(equalToConstant: 166),
+                
+                createButton.heightAnchor.constraint(equalToConstant: 60),
+                createButton.leadingAnchor.constraint(equalTo: cancelButton.trailingAnchor, constant: 8),
+                createButton.topAnchor.constraint(equalTo: collectionViewForColors.bottomAnchor, constant: 16),
+                createButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+                
+                createButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16)
+            ])
     }
     
     private func setupCollectionViews() {
@@ -196,7 +309,7 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
         collectionViewForColors.delegate = self
         collectionViewForColors.dataSource = self
         collectionViewForColors.translatesAutoresizingMaskIntoConstraints = false
-        collectionViewForEmojis.allowsMultipleSelection = false
+        collectionViewForColors.allowsMultipleSelection = false
         
         collectionViewForEmojis.register(
             EmojiCollectionViewCell.self,
@@ -218,6 +331,18 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
             withReuseIdentifier: Constants.identifierOfHeaderForColorCollectionView
         )
+    }
+    
+    private func makeEditInfoLabel() -> UILabel {
+        let editInfoLabel = UILabel()
+        
+        editInfoLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        editInfoLabel.textColor = .ypBlack
+        editInfoLabel.font = .systemFont(ofSize: 32, weight: .bold)
+        editInfoLabel.textAlignment = .center
+        
+        return editInfoLabel
     }
     
     private func makeTrackerNameTextField() -> UITextField {
@@ -269,9 +394,6 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     private func makeCreateButton() -> UIButton {
         let createButton = UIButton(type: .custom)
         
-        let textOfCreateButton = NSLocalizedString("title_of_createButton_on_newHabit_page", comment: "")
-        
-        createButton.setTitle(textOfCreateButton, for: .normal)
         createButton.setTitleColor(.systemBackground, for: .normal)
         createButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         createButton.contentHorizontalAlignment = .center
@@ -355,27 +477,43 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if collectionView == collectionViewForEmojis {
-            needEmoji = NewTrackerSetup.emojis[indexPath.row]
+            selectedEmoji = NewTrackerSetup.emojis[indexPath.row]
             isEmojiSelected = true
             updateCreateButtonState()
-            print("Эмодзи выбран: \(needEmoji)")
+            print("Эмодзи выбран: \(String(describing: selectedEmoji))")
         } else {
-            needColor = NewTrackerSetup.availableColours[indexPath.row]
+            selectedColor = NewTrackerSetup.availableColours[indexPath.row]
             isColorSelected = true
             updateCreateButtonState()
-            print("Цвет выбран: \(needColor)")
+            print("Цвет выбран: \(String(describing: selectedColor))")
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         if collectionView == collectionViewForEmojis {
-            needEmoji = ""
+            selectedEmoji = ""
             isEmojiSelected = false
-            print("Эмодзи не выбран: \(needEmoji)")
+            print("Эмодзи не выбран: \(String(describing: selectedEmoji))")
         } else {
-            needColor = .systemBackground
+            selectedColor = .systemBackground
             isColorSelected = false
-            print("Цвет не выбран: \(needColor)")
+            print("Цвет не выбран: \(String(describing: selectedEmoji))")
+        }
+    }
+    
+    private func makeDaysOfWeekText(from days: [DaysOfWeek]?) -> String? {
+        guard let days = days, !days.isEmpty else { return nil }
+        
+        let allDays: [DaysOfWeek] = [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]
+        
+        if Set(days) == Set(allDays) {
+            return Constants.allDaysText
+        } else if Set(days) == Set([.monday, .tuesday, .wednesday, .thursday, .friday]) {
+            return Constants.workingDaysText
+        } else if Set(days) == Set([.saturday, .sunday]) {
+            return Constants.weekendDaysText
+        } else {
+            return days.map { $0.localized }.joined(separator: ", ")
         }
     }
     
@@ -402,6 +540,12 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
         cell.detailTextLabel?.text = ""
         cell.detailTextLabel?.textColor = .ypGray
         cell.detailTextLabel?.font = .systemFont(ofSize: 17, weight: .regular)
+        
+        if indexPath.row == 0 {
+            cell.detailTextLabel?.text = selectedCategoryTitle
+        } else if indexPath.row == 1 {
+            cell.detailTextLabel?.text = selectedScheduleText
+        }
         
         cell.separatorInset = indexPath.row == listOfSections.count - 1
         ? UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
@@ -451,28 +595,38 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
                 self.isDaysSelected = !days.isEmpty
                 updateCreateButtonState()
                 
-                let workingDays: [String] = [
+                let selectedSet = Set(days)
+                
+                let allDaysSet = Set([
                     DaysOfWeek.monday.localized,
                     DaysOfWeek.tuesday.localized,
                     DaysOfWeek.wednesday.localized,
                     DaysOfWeek.thursday.localized,
-                    DaysOfWeek.friday.localized]
-                
-                let weekendDays: [String] = [
+                    DaysOfWeek.friday.localized,
                     DaysOfWeek.saturday.localized,
                     DaysOfWeek.sunday.localized
-                ]
+                ])
+
+                let workingDaysSet = Set([
+                    DaysOfWeek.monday.localized,
+                    DaysOfWeek.tuesday.localized,
+                    DaysOfWeek.wednesday.localized,
+                    DaysOfWeek.thursday.localized,
+                    DaysOfWeek.friday.localized
+                ])
+
+                let weekendDaysSet = Set([
+                    DaysOfWeek.saturday.localized,
+                    DaysOfWeek.sunday.localized
+                ])
                 
                 var daysString: String
                 
-                let isWorkingDays = workingDays.allSatisfy { days.contains($0)}
-                let isWeekendDays = weekendDays.allSatisfy { days.contains($0)}
-                
-                if days.count == 7 {
+                if selectedSet == allDaysSet {
                     daysString = Constants.allDaysText
-                } else if isWorkingDays {
+                } else if selectedSet == workingDaysSet {
                     daysString = Constants.workingDaysText
-                } else if isWeekendDays {
+                } else if selectedSet == weekendDaysSet {
                     daysString = Constants.weekendDaysText
                 } else {
                     daysString = days.joined(separator: ", ")
@@ -511,7 +665,13 @@ extension NewHabitViewController: UICollectionViewDataSource {
                 return UICollectionViewCell()
             }
             
-            cell.configure(NewTrackerSetup.emojis[indexPath.row])
+            let emoji = NewTrackerSetup.emojis[indexPath.row]
+            cell.configure(emoji)
+            
+            if emoji == selectedEmoji {
+                collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+                cell.isSelected = true
+            }
             
             return cell
         } else {
@@ -519,7 +679,13 @@ extension NewHabitViewController: UICollectionViewDataSource {
                 return UICollectionViewCell()
             }
             
-            cell.configure(NewTrackerSetup.availableColours[indexPath.row])
+            let color = NewTrackerSetup.availableColours[indexPath.row]
+            cell.configure(color)
+            
+            if let selectedColor = selectedColor, color.cgColor == selectedColor.cgColor {
+                collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+                cell.isSelected = true
+            }
             
             return cell
         }

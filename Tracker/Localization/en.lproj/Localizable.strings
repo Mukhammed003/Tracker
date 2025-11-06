@@ -48,3 +48,10 @@
 "text_of_button_on_error_alert_on_newHabit_page" = "OK";
 "title_of_error_alert_on_schedule_page" = "At least one day must be selected.";
 "text_of_button_on_error_alert_on_schedule_page" = "OK";
+"text_of_edit_section_in_context_menu_on_trackerCollectionViewCell" = "Edit";
+"text_of_delete_section_in_context_menu_on_trackerCollectionViewCell" = "Delete";
+"title_of_editHabitViewController" = "Edit Habit";
+"title_of_saveButton_on_editHabit_page" = "Save";
+"title_of_deleteAlert_on_trackerViewController" = "Are you sure you want to delete this tracker?";
+"deleteButton_of_deleteAlert_on_trackerViewController" = "Delete";
+"cancelButton_of_deleteAlert_on_trackerViewController" = "Cancel";
