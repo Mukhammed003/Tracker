@@ -55,3 +55,10 @@
 "title_of_deleteAlert_on_trackerViewController" = "Are you sure you want to delete this tracker?";
 "deleteButton_of_deleteAlert_on_trackerViewController" = "Delete";
 "cancelButton_of_deleteAlert_on_trackerViewController" = "Cancel";
+"text_of_filterButton_on_trackers_page" = "Filters";
+"text_of_allTrackers_section_on_filters_page" = "All Trackers";
+"text_of_forToday_section_on_filters_page" = "Today's Trackers";
+"text_of_completed_section_on_filters_page" = "Completed";
+"text_of_uncompleted_section_on_filters_page" = "Uncompleted";
+"title_of_filtersViewController" = "Filters";
+"text_of_nothingNotFoundLabel_on_trackers_page" = "Nothing found";

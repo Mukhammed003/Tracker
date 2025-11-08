@@ -62,10 +62,13 @@ final class Constants {
     static let categoryTableViewCellIdentifier = "CategoryTableViewCell"
     static let emojiCollectionViewCellIdentifier = "EmojiCollectionViewCell"
     static let colorCollectionViewCellIdentifier = "ColorCollectionViewCell"
+    static let filtersTableViewCellIdentifier = "FilterTableViewCell"
     
     static let identifierOfHeaderForTrackerCollectionView = "headerForTrackerCollectionView"
     static let identifierOfHeaderForEmojiCollectionView = "headerForEmojiCollectionView"
     static let identifierOfHeaderForColorCollectionView = "headerForColorCollectionView"
+    
+    static let selectedFilterIndex = "selectedFilterIndex"
     
     static let mondayFullText = NSLocalizedString("monday_on_schedule_page", comment: "")
     static let tuesdayFullText = NSLocalizedString("tuesday_on_schedule_page", comment: "")

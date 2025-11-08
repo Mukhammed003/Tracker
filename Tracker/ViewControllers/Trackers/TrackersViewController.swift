@@ -13,20 +13,30 @@ final class TrackersViewController: UIViewController {
     private var completedTrackers: Set<TrackerRecord> = []
     private var needTrackersByDate: [TrackerCategory] = []
     private var needTrackersForSelector: [TrackerCategory] = []
+    private var currentFilteredTrackers: [TrackerCategory] = []
     private var currentDate: Date = Date().startOfDayUTC
     
     private let collectionViewForTrackers = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
+    private lazy var filterButton: UIButton = makeFilterButton()
     private lazy var addTrackerButton: UIButton = makeAddTrackerButton()
     private lazy var datePicker: UIDatePicker = makeDatePicker()
     private lazy var searchField: UISearchController = makeSearchField()
+    
+    // splash view
     private lazy var splashContainerView: UIView = makeSplashContainerView()
     private lazy var notFoundImage: UIImageView = makeNotFoundImage()
     private lazy var notFoundLabel: UILabel = makeNotFoundLabel()
     
+    // nothing not found view
+    private lazy var nothingNotFoundView: UIView = makeNothingNotFoundView()
+    private lazy var nothingNotFoundImage: UIImageView = makeNothingNotFoundImage()
+    private lazy var nothingNotFoundLabel: UILabel = makeNothingNotFoundLabel()
+    
     private let trackerCategoryStore = TrackerCategoryStore()
     private let trackerRecordStore = TrackerRecordStore()
     private let trackerStore = TrackerStore()
+    private let storage = Storage.shared
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,9 +48,35 @@ final class TrackersViewController: UIViewController {
         setupNavBar()
         setupCollectionView()
         setupSplashView()
+        setupNothingNotFoundView()
         
         filterTrackersByDate()
         showNeedScreen()
+    }
+    
+    @objc private func clcickToFilterButton() {
+        let filtersVc = FiltersViewController()
+        let navController = UINavigationController(rootViewController: filtersVc)
+        navController.modalPresentationStyle = .pageSheet
+        
+        filtersVc.onFilterSelected = { [weak self] index in
+            guard let self = self else { return }
+            
+            switch index {
+            case 0:
+                choosedAllFilters()
+            case 1:
+                choosedFiltersForToday()
+            case 2:
+                choosedCompletedFilters()
+            case 3:
+                choosedUncompletedFilters()
+            default: break
+            }
+            
+        }
+        
+        present(navController, animated: true)
     }
     
     @objc private func clickToAddTrackerButton() {
@@ -82,6 +118,20 @@ final class TrackersViewController: UIViewController {
         
         filterTrackersByDate()
         showNeedScreen()
+        
+        let filterType: Int? = storage.loadSelectedFilter()
+        
+        switch filterType {
+        case 0:
+            choosedAllFilters()
+        case 1:
+            choosedFiltersForToday(overrideDate: false)
+        case 2:
+            choosedCompletedFilters()
+        case 3:
+            choosedUncompletedFilters()
+        default: break
+        }
     }
     
     private func handlerForTrackerCompletion(trackerID: UInt, isCompleted: Bool) {
@@ -103,11 +153,22 @@ final class TrackersViewController: UIViewController {
         if needTrackersByDate.isEmpty {
             splashContainerView.isHidden = false
             collectionViewForTrackers.isHidden = true
+            filterButton.isHidden = true
+            nothingNotFoundView.isHidden = true
         } else {
             splashContainerView.isHidden = true
             collectionViewForTrackers.isHidden = false
+            filterButton.isHidden = false
+            nothingNotFoundView.isHidden = true
             collectionViewForTrackers.reloadData()
         }
+    }
+    
+    private func showNothingNotFoundView() {
+        splashContainerView.isHidden = true
+        collectionViewForTrackers.isHidden = true
+        filterButton.isHidden = true
+        nothingNotFoundView.isHidden = false
     }
     
     private func setupNavBar() {
@@ -124,6 +185,30 @@ final class TrackersViewController: UIViewController {
         
         navigationItem.searchController = searchField
         navigationItem.hidesSearchBarWhenScrolling = false
+    }
+    
+    private func setupNothingNotFoundView() {
+        nothingNotFoundView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(nothingNotFoundView)
+        
+        nothingNotFoundView.addSubview(nothingNotFoundImage)
+        nothingNotFoundView.addSubview(nothingNotFoundLabel)
+        
+        NSLayoutConstraint.activate([
+            nothingNotFoundView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            nothingNotFoundView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            nothingNotFoundView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            nothingNotFoundView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            
+            nothingNotFoundImage.heightAnchor.constraint(equalToConstant: 80),
+            nothingNotFoundImage.widthAnchor.constraint(equalToConstant: 80),
+            nothingNotFoundImage.centerXAnchor.constraint(equalTo: nothingNotFoundView.centerXAnchor),
+            nothingNotFoundImage.centerYAnchor.constraint(equalTo: nothingNotFoundView.centerYAnchor),
+            
+            nothingNotFoundLabel.leadingAnchor.constraint(equalTo: nothingNotFoundView.leadingAnchor, constant: 16),
+            nothingNotFoundLabel.topAnchor.constraint(equalTo: nothingNotFoundImage.bottomAnchor, constant: 8),
+            nothingNotFoundLabel.trailingAnchor.constraint(equalTo: nothingNotFoundView.trailingAnchor, constant: -16)
+        ])
     }
     
     private func setupSplashView() {
@@ -168,13 +253,46 @@ final class TrackersViewController: UIViewController {
         )
         
         view.addSubview(collectionViewForTrackers)
+        view.addSubview(filterButton)
+        
+        collectionViewForTrackers.alwaysBounceVertical = true
+        
+        collectionViewForTrackers.contentInset = UIEdgeInsets(
+                top: 0,
+                left: 0,
+                bottom: 16 + 50, 
+                right: 0
+            )
+        collectionViewForTrackers.scrollIndicatorInsets = collectionViewForTrackers.contentInset
         
         NSLayoutConstraint.activate([
             collectionViewForTrackers.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             collectionViewForTrackers.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             collectionViewForTrackers.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            collectionViewForTrackers.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            collectionViewForTrackers.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            filterButton.widthAnchor.constraint(equalToConstant: 114),
+            filterButton.heightAnchor.constraint(equalToConstant: 50),
+            filterButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            filterButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
         ])
+    }
+    
+    private func makeFilterButton() -> UIButton {
+        let filterButton = UIButton(type: .custom)
+        
+        let textOfFilterButton = NSLocalizedString("text_of_filterButton_on_trackers_page", comment: "")
+        
+        filterButton.setTitle(textOfFilterButton, for: .normal)
+        filterButton.setTitleColor(.systemBackground, for: .normal)
+        filterButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .regular)
+        filterButton.contentHorizontalAlignment = .center
+        filterButton.backgroundColor = .ypBlue
+        filterButton.layer.cornerRadius = 16
+        filterButton.addTarget(self, action: #selector(clcickToFilterButton), for: .touchUpInside)
+        filterButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        return filterButton
     }
     
     private func makeAddTrackerButton() -> UIButton {
@@ -225,6 +343,36 @@ final class TrackersViewController: UIViewController {
         let splashContainerView = UIView()
         
         return splashContainerView
+    }
+    
+    private func makeNothingNotFoundImage() -> UIImageView {
+        let nothingNotFoundImage = createUIImageView(
+            nameOfImage: .notFoundImage2,
+            radiusIfNeeded: 0)
+        
+        return nothingNotFoundImage
+    }
+    
+    private func makeNothingNotFoundLabel() -> UILabel {
+        
+        let textOfNothingNotFoundLabel = NSLocalizedString("text_of_nothingNotFoundLabel_on_trackers_page", comment: "")
+        
+        let nothingNotFoundLabel = createUILabel(
+            textOfLabel: textOfNothingNotFoundLabel,
+            letterSpacing: 0,
+            colorOfLabel: .ypBlack,
+            fontSizeOfLabel: 12,
+            weightOfLabel: .medium)
+        
+        nothingNotFoundLabel.textAlignment = .center
+        
+        return nothingNotFoundLabel
+    }
+    
+    private func makeNothingNotFoundView() -> UIView {
+        let nothingNotFoundView = UIView()
+        
+        return nothingNotFoundView
     }
     
     private func createUIImageView(nameOfImage imageResource: ImageResource, radiusIfNeeded cornerRadius: CGFloat) -> UIImageView {
@@ -367,7 +515,7 @@ final class TrackersViewController: UIViewController {
     
     private func reloadDataInCollectionAfterChangingsInCoreData() {
         DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
+            guard let self = self else { return }
             self.loadTrackersFromCoreData()
             self.collectionViewForTrackers.reloadData()
             self.showNeedScreen()
@@ -450,6 +598,81 @@ final class TrackersViewController: UIViewController {
     private func deleteTracker(trackerId: Int64, header: String) {
         trackerCategoryStore.deleteTrackerInSuchCategory(trackerId: trackerId, header: header)
     }
+    
+    // For filter process
+    
+    private func choosedAllFilters() {
+        needTrackersForSelector = needTrackersByDate
+        
+        if needTrackersForSelector.isEmpty {
+            showNothingNotFoundView()
+        }
+        
+        collectionViewForTrackers.reloadData()
+    }
+    
+    private func choosedFiltersForToday() {
+        currentDate = Date().startOfDayUTC
+        datePicker.setDate(currentDate, animated: true)
+        datePicker.sendActions(for: .valueChanged)
+        
+        if needTrackersForSelector.isEmpty {
+            showNothingNotFoundView()
+        }
+        
+        collectionViewForTrackers.reloadData()
+    }
+    
+    private func choosedCompletedFilters() {
+        let selectedDate = currentDate
+        
+        needTrackersForSelector = needTrackersByDate.compactMap { category in
+            let filteredTrackers = category.listOfTrackers.filter { tracker in
+                let record = TrackerRecord(id: tracker.id, date: selectedDate)
+                return completedTrackers.contains(record)
+            }
+            return filteredTrackers.isEmpty ? nil : TrackerCategory(header: category.header, listOfTrackers: filteredTrackers)
+        }
+        
+        if needTrackersForSelector.isEmpty {
+            showNothingNotFoundView()
+        }
+        
+        collectionViewForTrackers.reloadData()
+    }
+    
+    private func choosedUncompletedFilters() {
+        let selectedDate = currentDate
+        
+        needTrackersForSelector = needTrackersByDate.compactMap { category in
+            let filteredTrackers = category.listOfTrackers.filter { tracker in
+                let record = TrackerRecord(id: tracker.id, date: selectedDate)
+                return !completedTrackers.contains(record)
+            }
+            return filteredTrackers.isEmpty ? nil : TrackerCategory(header: category.header, listOfTrackers: filteredTrackers)
+        }
+        
+        if needTrackersForSelector.isEmpty {
+            showNothingNotFoundView()
+        }
+        
+        collectionViewForTrackers.reloadData()
+    }
+    
+    private func choosedFiltersForToday(overrideDate: Bool = true) {
+        if overrideDate {
+            currentDate = Date().startOfDayUTC
+            datePicker.setDate(currentDate, animated: true)
+        }
+        
+        filterTrackersByDate()
+        
+        if needTrackersForSelector.isEmpty {
+            showNothingNotFoundView()
+        }
+        
+        collectionViewForTrackers.reloadData()
+    }
 }
 
 extension TrackersViewController: UISearchResultsUpdating {
@@ -457,21 +680,26 @@ extension TrackersViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         guard let searchText = searchController.searchBar.text,
               !searchText.isEmpty else  {
-            needTrackersForSelector = needTrackersByDate
             collectionViewForTrackers.reloadData()
             return
         }
         
         let lowercasedSearchText = searchText.lowercased()
         
-        needTrackersForSelector = needTrackersByDate.compactMap { category in
+        needTrackersForSelector = needTrackersForSelector.compactMap { category in
             let filteredTrackers = category.listOfTrackers.filter {
                 $0.name.lowercased().contains(lowercasedSearchText)
             }
             
-            return filteredTrackers.isEmpty ? nil : TrackerCategory(header: category.header, listOfTrackers: filteredTrackers)
+            return filteredTrackers.isEmpty
+            ? nil
+            : TrackerCategory(header: category.header, listOfTrackers: filteredTrackers)
         }
         
+        if needTrackersForSelector.isEmpty {
+            showNothingNotFoundView()
+        }
+
         collectionViewForTrackers.reloadData()
     }
 }

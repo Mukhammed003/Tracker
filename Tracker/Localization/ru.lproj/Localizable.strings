@@ -55,3 +55,10 @@
 "title_of_deleteAlert_on_trackerViewController" = "Уверены что хотите удалить трекер?";
 "deleteButton_of_deleteAlert_on_trackerViewController" = "Удалить";
 "cancelButton_of_deleteAlert_on_trackerViewController" = "Отменить";
+"text_of_filterButton_on_trackers_page" = "Фильтры";
+"text_of_allTrackers_section_on_filters_page" = "Все трекеры";
+"text_of_forToday_section_on_filters_page" = "Трекеры на сегодня";
+"text_of_completed_section_on_filters_page" = "Завершенные";
+"text_of_uncompleted_section_on_filters_page" = "Не завершенные";
+"title_of_filtersViewController" = "Фильтры";
+"text_of_nothingNotFoundLabel_on_trackers_page" = "Ничего не найдено";

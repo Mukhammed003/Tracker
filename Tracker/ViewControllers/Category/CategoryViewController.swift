@@ -11,7 +11,6 @@ final class CategoryViewController: UIViewController {
     
     var onCategorySelected: ((String) -> Void)?
     
-    
     private let viewModel: CategoryViewModel
     
     private lazy var tableViewWithCategories: UITableView = makeTableViewWithCategories()
@@ -141,18 +140,18 @@ final class CategoryViewController: UIViewController {
     }
     
     private func makeTableViewWithCategories() -> UITableView {
-        let tableViewWithDaysOfWeek = UITableView()
-        tableViewWithDaysOfWeek.backgroundColor = .systemBackground
-        tableViewWithDaysOfWeek.separatorStyle = .singleLine
-        tableViewWithDaysOfWeek.layer.cornerRadius = 16
-        tableViewWithDaysOfWeek.translatesAutoresizingMaskIntoConstraints = false
+        let tableViewWithCategories = UITableView()
+        tableViewWithCategories.backgroundColor = .systemBackground
+        tableViewWithCategories.separatorStyle = .singleLine
+        tableViewWithCategories.layer.cornerRadius = 16
+        tableViewWithCategories.translatesAutoresizingMaskIntoConstraints = false
         
         if #available(iOS 15.0, *) {
-            tableViewWithDaysOfWeek.sectionHeaderTopPadding = 0
+            tableViewWithCategories.sectionHeaderTopPadding = 0
         }
-        tableViewWithDaysOfWeek.tableHeaderView = UIView(frame: .zero)
+        tableViewWithCategories.tableHeaderView = UIView(frame: .zero)
         
-        return tableViewWithDaysOfWeek
+        return tableViewWithCategories
     }
     
     private func makeAddCategoryButton() -> UIButton {

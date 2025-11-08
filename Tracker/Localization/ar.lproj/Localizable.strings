@@ -55,3 +55,10 @@
 "title_of_deleteAlert_on_trackerViewController" = "هل أنت متأكد أنك تريد حذف هذا المتتبع؟";
 "deleteButton_of_deleteAlert_on_trackerViewController" = "حذف";
 "cancelButton_of_deleteAlert_on_trackerViewController" = "إلغاء";
+"text_of_filterButton_on_trackers_page" = "الفلاتر";
+"text_of_allTrackers_section_on_filters_page" = "جميع المتتبعين";
+"text_of_forToday_section_on_filters_page" = "متتبعات اليوم";
+"text_of_completed_section_on_filters_page" = "مكتملة";
+"text_of_uncompleted_section_on_filters_page" = "غير مكتملة";
+"title_of_filtersViewController" = "الفلاتر";
+"text_of_nothingNotFoundLabel_on_trackers_page" = "لم يتم العثور على أي شيء";
