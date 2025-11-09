@@ -13,14 +13,17 @@ final class TrackersViewController: UIViewController {
     private var completedTrackers: Set<TrackerRecord> = []
     private var needTrackersByDate: [TrackerCategory] = []
     private var needTrackersForSelector: [TrackerCategory] = []
-    private var currentFilteredTrackers: [TrackerCategory] = []
     private var currentDate: Date = Date().startOfDayUTC
     
     private let collectionViewForTrackers = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
     private lazy var filterButton: UIButton = makeFilterButton()
     private lazy var addTrackerButton: UIButton = makeAddTrackerButton()
-    private lazy var datePicker: UIDatePicker = makeDatePicker()
+    
+    private lazy var datePickerView: UIView = makeDatePickerView()
+    private lazy var datePicker = UIDatePicker()
+    private lazy var datePickerLabel = UILabel()
+    
     private lazy var searchField: UISearchController = makeSearchField()
     
     // splash view
@@ -114,6 +117,8 @@ final class TrackersViewController: UIViewController {
     }
     
     @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
+        datePickerLabel.text = formatDate(date: sender.date.startOfDayUTC)
+        
         currentDate = sender.date.startOfDayUTC
         
         filterTrackersByDate()
@@ -181,7 +186,7 @@ final class TrackersViewController: UIViewController {
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: addTrackerButton)
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePickerView)
         
         navigationItem.searchController = searchField
         navigationItem.hidesSearchBarWhenScrolling = false
@@ -237,6 +242,8 @@ final class TrackersViewController: UIViewController {
     }
     
     private func setupCollectionView() {
+        collectionViewForTrackers.backgroundColor = .ypWhite
+        
         collectionViewForTrackers.delegate = self
         collectionViewForTrackers.dataSource = self
         collectionViewForTrackers.translatesAutoresizingMaskIntoConstraints = false
@@ -278,6 +285,12 @@ final class TrackersViewController: UIViewController {
         ])
     }
     
+    private func formatDate(date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yy"
+        return formatter.string(from: date.startOfDayUTC)
+    }
+    
     private func makeFilterButton() -> UIButton {
         let filterButton = UIButton(type: .custom)
         
@@ -296,13 +309,13 @@ final class TrackersViewController: UIViewController {
     }
     
     private func makeAddTrackerButton() -> UIButton {
-        let addTrackerButton = createUIButton(imageForButton: "plus", forSelector: #selector(clickToAddTrackerButton), colorOfIcon: .black)
+        let addTrackerButton = createUIButton(imageForButton: "plus", forSelector: #selector(clickToAddTrackerButton), colorOfIcon: .ypBlack)
         
         return addTrackerButton
     }
     
-    private func makeDatePicker() -> UIDatePicker {
-        let datePicker = createDatePicker()
+    private func makeDatePickerView() -> UIView {
+        let datePicker = createDatePickerView()
         
         return datePicker
     }
@@ -392,7 +405,7 @@ final class TrackersViewController: UIViewController {
     private func createUIButton(imageForButton name: String, forSelector selector: Selector, colorOfIcon tintColor: UIColor) -> UIButton {
         let exampleButton = UIButton(type: .system)
             
-        if let buttonImage = UIImage(systemName: name) {
+        if let buttonImage = UIImage(systemName: name, withConfiguration: UIImage.SymbolConfiguration(weight: .bold)) {
                 exampleButton.setImage(buttonImage, for: .normal)
         } else if let buttonImage = UIImage(named: name) {
                 exampleButton.setImage(buttonImage, for: .normal)
@@ -407,18 +420,52 @@ final class TrackersViewController: UIViewController {
         return exampleButton
     }
     
-    private func createDatePicker() -> UIDatePicker {
-        let datePicker = UIDatePicker()
+    private func createDatePickerView() -> UIView {
+        let container = UIView()
+        container.backgroundColor = UIColor(red: 240/255, green: 240/255, blue: 240/255, alpha: 1)
+        container.layer.cornerRadius = 8
+        container.clipsToBounds = true
+        container.translatesAutoresizingMaskIntoConstraints = false
         
+        let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date
         datePicker.preferredDatePickerStyle = .compact
-        
-        let localeIdentifierOfDatePicker = NSLocalizedString("locale_identifier_of_datePicker", comment: "")
-        
-        datePicker.locale = Locale(identifier: localeIdentifierOfDatePicker)
+        datePicker.locale = Locale(identifier: NSLocalizedString("locale_identifier_of_datePicker", comment: ""))
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         
-        return datePicker
+        container.addSubview(datePicker)
+        datePicker.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            datePicker.topAnchor.constraint(equalTo: container.topAnchor, constant: 0),
+            datePicker.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 0),
+            datePicker.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: 0),
+            datePicker.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: 0)
+        ])
+        datePicker.alpha = 0.011
+        datePicker.isUserInteractionEnabled = true
+        
+        // Лейбл с текущей датой
+        let dateLabel = UILabel()
+        dateLabel.textColor = .black
+        dateLabel.font = .systemFont(ofSize: 16)
+        dateLabel.textAlignment = .center
+        dateLabel.text = formatDate(date: Date().startOfDayUTC) // начальная дата
+        
+        container.addSubview(dateLabel)
+        dateLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            container.widthAnchor.constraint(equalToConstant: 77),
+            container.heightAnchor.constraint(equalToConstant: 34),
+            dateLabel.topAnchor.constraint(equalTo: container.topAnchor, constant: 6),
+            dateLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 5),
+            dateLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -5),
+            dateLabel.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -6),
+        ])
+        
+        self.datePicker = datePicker
+        self.datePickerLabel = dateLabel
+        
+        return container
     }
     
     private func createUILabel(textOfLabel exampleText: String, letterSpacing kern: CGFloat, colorOfLabel foregroundColor: UIColor, fontSizeOfLabel fontSize: CGFloat, weightOfLabel weight: UIFont.Weight) -> UILabel {

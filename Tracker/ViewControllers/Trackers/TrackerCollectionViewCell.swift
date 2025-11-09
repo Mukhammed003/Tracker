@@ -151,7 +151,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell, UIContextMenuIntera
         let emojiLabel = UILabel()
         emojiLabel.font = UIFont.systemFont(ofSize: 15, weight: .medium)
         emojiLabel.textAlignment = .center
-        emojiLabel.backgroundColor = .ypWhite.withAlphaComponent(0.3)
+        emojiLabel.backgroundColor = .white.withAlphaComponent(0.3)
         emojiLabel.layer.cornerRadius = 12
         emojiLabel.clipsToBounds = true
         emojiLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -162,7 +162,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell, UIContextMenuIntera
     private func makeTrackerLabel() -> UILabel {
         let trackerLabel = UILabel()
         trackerLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        trackerLabel.textColor = .ypWhite
+        trackerLabel.textColor = .white
         trackerLabel.numberOfLines = 2
         trackerLabel.translatesAutoresizingMaskIntoConstraints = false
         
