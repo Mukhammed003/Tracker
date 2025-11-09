@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreData
+import AppMetricaCore
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -14,6 +15,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         UserDefaults.standard.removeObject(forKey: Constants.selectedFilterIndex)
+        
+        if let configuration = AppMetricaConfiguration(apiKey: "44ead0c0-d337-4a20-ae21-add5919408fd") {
+            AppMetrica.activate(with: configuration)
+        }
         
         DaysValueTransformer.register()
         ColorTransformer.register()

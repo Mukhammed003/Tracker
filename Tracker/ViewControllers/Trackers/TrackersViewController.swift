@@ -40,6 +40,7 @@ final class TrackersViewController: UIViewController {
     private let trackerRecordStore = TrackerRecordStore()
     private let trackerStore = TrackerStore()
     private let storage = Storage.shared
+    private let analyticsService = AnalyticsService()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,6 +59,11 @@ final class TrackersViewController: UIViewController {
     }
     
     @objc private func clcickToFilterButton() {
+        let params: [AnyHashable: Any] = ["Event": "click", "Screen": "Main", "Item": "filter"]
+        let eventName = "filter"
+        
+        analyticsService.addEvent(eventName: eventName, params: params)
+        
         let filtersVc = FiltersViewController()
         let navController = UINavigationController(rootViewController: filtersVc)
         navController.modalPresentationStyle = .pageSheet
@@ -83,6 +89,12 @@ final class TrackersViewController: UIViewController {
     }
     
     @objc private func clickToAddTrackerButton() {
+        let params: [AnyHashable: Any] = ["Event": "click", "Screen": "Main", "Item": "add_track"]
+        let eventName = "add_track"
+        
+        analyticsService.addEvent(eventName: eventName, params: params)
+        
+        
         let newHabitVc = NewHabitViewController(mode: .create)
         newHabitVc.categories = self.categories
         
@@ -141,6 +153,11 @@ final class TrackersViewController: UIViewController {
     
     private func handlerForTrackerCompletion(trackerID: UInt, isCompleted: Bool) {
         if isCompleted {
+            let params: [AnyHashable: Any] = ["Event": "click", "Screen": "Main", "Item": "track"]
+            let eventName = "track_completed"
+            
+            analyticsService.addEvent(eventName: eventName, params: params)
+            
             trackerCompleted(trackerID: trackerID)
         } else {
             trackerUncompleted(trackerID: trackerID)
@@ -804,8 +821,18 @@ extension TrackersViewController: UICollectionViewDataSource {
             menuHandler: { [weak self] trackerID, action in
                 switch action {
                 case .edit:
+                    let params: [AnyHashable: Any] = ["Event": "click", "Screen": "Main", "Item": "edit"]
+                    let eventName = "edit"
+                    
+                    self?.analyticsService.addEvent(eventName: eventName, params: params)
+                    
                     self?.openEditingPageForTracker(tracker: tracker, headerOfCategory: headerOfCategory, textCountOfCompletedDays: numberOfDays)
                 case .delete:
+                    let params: [AnyHashable: Any] = ["Event": "click", "Screen": "Main", "Item": "delete"]
+                    let eventName = "delete"
+                    
+                    self?.analyticsService.addEvent(eventName: eventName, params: params)
+                    
                     self?.showDeleteAlert(for: Int64(trackerID), header: headerOfCategory)
                 }
             })
