@@ -137,7 +137,6 @@ final class TrackerCategoryStore: NSObject {
     }
     
     func deleteTrackerInSuchCategory(trackerId: Int64, header: String) {
-        
         let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         request.predicate = NSPredicate(format: "header == %@", header)
         
@@ -187,7 +186,6 @@ final class TrackerCategoryStore: NSObject {
                 debugPrintAllCategories()
                 trackerStore.debugPrintAllTrackers()
             } else {
-                // 2️⃣ Находим старую категорию и трекер
                 let oldRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
                 oldRequest.predicate = NSPredicate(format: "header == %@", oldCategoryName)
                 
@@ -198,7 +196,6 @@ final class TrackerCategoryStore: NSObject {
                     return
                 }
                 
-                // 3️⃣ Создаём новый трекер в новой категории
                 let newTrackerCD = TrackerCoreData(context: context)
                 newTrackerCD.id = Int64(tracker.id)
                 newTrackerCD.name = tracker.name
@@ -208,7 +205,6 @@ final class TrackerCategoryStore: NSObject {
                 
                 category.addToListOfTrackers(newTrackerCD)
                 
-                // 4️⃣ Переносим все записи TrackerRecordCoreData
                 if let records = oldTracker.record as? Set<TrackerRecordCoreData> {
                     for record in records {
                         record.tracker = newTrackerCD
@@ -216,7 +212,6 @@ final class TrackerCategoryStore: NSObject {
                     print("📦 Перенесено \(records.count) записей в новый трекер")
                 }
                 
-                // 5️⃣ Удаляем старый трекер
                 context.delete(oldTracker)
                 
                 print("♻️ Трекер перенесён из категории '\(oldCategoryName)' в '\(categoryName)'")
@@ -230,6 +225,41 @@ final class TrackerCategoryStore: NSObject {
             print("❌ Ошибка при обновлении трекера в категории \(categoryName): \(error)")
         }
     }
+    
+    func deleteCategory(withHeader header: String) {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "header == %@", header)
+        
+        do {
+            if let category = try context.fetch(request).first {
+                context.delete(category)
+                saveContext()
+                print("Категория '\(header)' удалена вместе с трекерами и записями")
+                debugPrintAllCategories()
+                trackerStore.debugPrintAllTrackers()
+            }
+        } catch {
+            print("Ошибка при удалении категории: \(error)")
+        }
+    }
+
+    func updateCategory(oldHeader: String, newHeader: String) {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "header == %@", oldHeader)
+        
+        do {
+            if let category = try context.fetch(request).first {
+                category.header = newHeader
+                saveContext()
+                print("Категория '\(oldHeader)' обновлена на '\(newHeader)'")
+                debugPrintAllCategories()
+                trackerStore.debugPrintAllTrackers()
+            }
+        } catch {
+            print("Ошибка при обновлении категории: \(error)")
+        }
+    }
+
     
     private func trackerCategory(from trackerCategoryCoreData: TrackerCategoryCoreData) throws -> TrackerCategory {
         guard let header = trackerCategoryCoreData.header else {

@@ -37,7 +37,13 @@ final class CategoryViewModel {
         return categories[index].header
     }
     
-    func isCategoryExists(_ name: String) -> Bool {
-        return categoryStore.isExistsSuchCategory(withHeader: name)
+    func deleteCategory(header: String) {
+        categoryStore.deleteCategory(withHeader: header)
+        loadCategories()
+    }
+    
+    func updateCategory(oldHeader: String, newHeader: String) {
+        categoryStore.updateCategory(oldHeader: oldHeader, newHeader: newHeader)
+        loadCategories()
     }
 }

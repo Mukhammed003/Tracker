@@ -11,7 +11,10 @@ final class CategoryViewController: UIViewController {
     
     var onCategorySelected: ((String) -> Void)?
     
+    private var statisticsManager: StatisticsManager?
     private let viewModel: CategoryViewModel
+    private let trackerCategoryStore = TrackerCategoryStore()
+    private let trackerRecordStore = TrackerRecordStore()
     
     private lazy var tableViewWithCategories: UITableView = makeTableViewWithCategories()
     private lazy var splashContainerView: UIView = makeSplashContainerView()
@@ -30,6 +33,8 @@ final class CategoryViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        statisticsManager = StatisticsManager(categoryStore: trackerCategoryStore, recordStore: trackerRecordStore)
         
         view.backgroundColor = .systemBackground
         
@@ -53,7 +58,9 @@ final class CategoryViewController: UIViewController {
     @objc private func buttonAddCategoryClicked() {
         print("Кнопка добавить категорию нажата")
         
-        let newCategoryVc = NewCategoryViewController(viewModel: viewModel)
+        let newCategoryViewModel = NewCategoryViewModel(categoryStore: TrackerCategoryStore(), mode: .create)
+        
+        let newCategoryVc = NewCategoryViewController(viewModel: newCategoryViewModel)
         
         newCategoryVc.onNewCategoryCreated = { [weak self] newCategory in
             self?.viewModel.addCategory(newCategory)
@@ -209,6 +216,70 @@ final class CategoryViewController: UIViewController {
         
         return notFoundLabel
     }
+    
+    // Context menu process
+    
+    private func showDeleteAlert(needHeader: String) {
+        let titleOfDeleteAlert = NSLocalizedString("title_of_deleteAlert", comment: "")
+        let textOfDeleteButton = NSLocalizedString("deleteButton_of_deleteAlert", comment: "")
+        let textOfCancelButton = NSLocalizedString("cancelButton_of_deleteAlert", comment: "")
+        
+        let alert = UIAlertController(
+            title: titleOfDeleteAlert,
+            message: nil,
+            preferredStyle: .actionSheet
+        )
+        
+        let deleteAction = UIAlertAction(title: textOfDeleteButton, style: .destructive) { [weak self] _ in
+            self?.deleteCategory(needHeader: needHeader)
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self?.statisticsManager?.recalculateStatistics()
+            }
+        }
+        
+        let cancelAction = UIAlertAction(title: textOfCancelButton, style: .cancel)
+        
+        alert.addAction(deleteAction)
+        alert.addAction(cancelAction)
+        
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = self.view
+            popover.sourceRect = CGRect(
+                x: self.view.bounds.midX,
+                y: self.view.bounds.midY,
+                width: 0,
+                height: 0
+            )
+            popover.permittedArrowDirections = []
+        }
+        
+        present(alert, animated: true)
+    }
+    
+    private func openEditingPageForTracker(
+        oldHeader: String
+    ) {
+        print("Нажали на редактировать в контекстном меню категории")
+        
+        let newCategoryViewModel = NewCategoryViewModel(categoryStore: TrackerCategoryStore(), mode: .edit(oldHeader: oldHeader))
+        
+        let editCategoryVc = NewCategoryViewController(viewModel: newCategoryViewModel)
+        let navVc = UINavigationController(rootViewController: editCategoryVc)
+        navVc.modalPresentationStyle = .pageSheet
+        
+        editCategoryVc.onCategoryEdited = { [weak self] newCategoryName in
+            guard let self = self else { return }
+                
+            viewModel.updateCategory(oldHeader: oldHeader, newHeader: newCategoryName)
+        }
+        
+        present(navVc, animated: true)
+    }
+    
+    private func deleteCategory(needHeader: String) {
+        viewModel.deleteCategory(header: needHeader)
+    }
 }
 
 extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
@@ -251,7 +322,31 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
         dismiss(animated: true)
     }
     
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        let textOfEditSection = NSLocalizedString("text_of_edit_section_in_context_menu", comment: "")
+        let textOfEditDeleteSection = NSLocalizedString("text_of_delete_section_in_context_menu", comment: "")
+        
+        let configuration = UIContextMenuConfiguration(
+            identifier: nil,
+            previewProvider: nil) { _ in
+                
+                let editAction = UIAction(title: textOfEditSection) { _ in
+                    self.openEditingPageForTracker(oldHeader: self.viewModel.categories[indexPath.row].header)
+                }
+                
+                let deleteAction = UIAction(title: textOfEditDeleteSection, attributes: .destructive) { _ in
+                    self.showDeleteAlert(needHeader: self.viewModel.categories[indexPath.row].header)
+                }
+                
+                return UIMenu(title: "", children: [editAction, deleteAction])
+            }
+        
+        return configuration
+    }
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         75
     }
 }
+
+

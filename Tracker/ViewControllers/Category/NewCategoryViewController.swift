@@ -10,11 +10,12 @@ import UIKit
 final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     
     var onNewCategoryCreated: ((String) -> Void)?
+    var onCategoryEdited: ((String) -> Void)?
     
-    private let viewModel: CategoryViewModel
+    private let viewModel: NewCategoryViewModel
     private var isTextFieldFilled = false
     
-    init(viewModel: CategoryViewModel) {
+    init(viewModel: NewCategoryViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -28,6 +29,12 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if case .edit = viewModel.mode {
+            categoryNameTextField.text = viewModel.oldCategoryName
+            isTextFieldFilled = true
+            updateReadyButtonState()
+        }
         
         view.backgroundColor = .systemBackground
         
@@ -44,19 +51,37 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     }
     
     @objc private func buttonReadyClicked() {
-        guard let text = categoryNameTextField.text,
-              !text.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-        
-        let titleOfErrorAlert = NSLocalizedString("title_of_error_alert_on_newCategory_page", comment: "")
-        let messageOfErrorAlert = NSLocalizedString("message_of_error_alert_on_newCategory_page", comment: "")
-        
-        if viewModel.isCategoryExists(text) {
-            showAlert(title: titleOfErrorAlert, message: messageOfErrorAlert)
-            return
+        switch viewModel.mode {
+        case .create:
+            guard let text = categoryNameTextField.text,
+                  !text.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+            
+            let titleOfErrorAlert = NSLocalizedString("title_of_error_alert_on_newCategory_page", comment: "")
+            let messageOfErrorAlert = NSLocalizedString("message_of_error_alert_on_newCategory_page", comment: "")
+            
+            if viewModel.isCategoryExists(text) {
+                showAlert(title: titleOfErrorAlert, message: messageOfErrorAlert)
+                return
+            }
+            
+            onNewCategoryCreated?(text)
+            view.endEditing(true)
+        case .edit:
+            guard let text = categoryNameTextField.text,
+                  !text.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+            
+            let titleOfErrorAlert = NSLocalizedString("title_of_error_alert_on_newCategory_page", comment: "")
+            let messageOfErrorAlert = NSLocalizedString("message_of_error_alert_on_newCategory_page", comment: "")
+            
+            if viewModel.isCategoryExists(text) {
+                showAlert(title: titleOfErrorAlert, message: messageOfErrorAlert)
+                return
+            }
+            
+            onCategoryEdited?(text)
+            view.endEditing(true)
         }
         
-        onNewCategoryCreated?(text)
-        view.endEditing(true)
         dismiss(animated: true)
     }
     
