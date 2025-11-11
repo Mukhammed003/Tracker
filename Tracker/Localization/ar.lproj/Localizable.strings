@@ -62,3 +62,9 @@
 "text_of_uncompleted_section_on_filters_page" = "غير مكتملة";
 "title_of_filtersViewController" = "الفلاتر";
 "text_of_nothingNotFoundLabel_on_trackers_page" = "لم يتم العثور على أي شيء";
+"header_of_statistics_page" = "الإحصائيات";
+"text_of_nothingToAnalyzeLabel_on_statistics_page" = "لا يوجد ما يتم تحليله بعد";
+"text_of_bestPeriodLabel_in_statistcs_page" = "أفضل فترة";
+"text_of_perfectDaysLabel_in_statistcs_page" = "الأيام المثالية";
+"text_of_completedTrackersLabel_in_statistcs_page" = "المتعقبات المكتملة";
+"text_of_averageValueLabel_in_statistcs_page" = "القيمة المتوسطة";

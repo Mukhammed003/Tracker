@@ -62,3 +62,9 @@
 "text_of_uncompleted_section_on_filters_page" = "Nicht abgeschlossen";
 "title_of_filtersViewController" = "Filter";
 "text_of_nothingNotFoundLabel_on_trackers_page" = "Nichts gefunden";
+"header_of_statistics_page" = "Statistik";
+"text_of_nothingToAnalyzeLabel_on_statistics_page" = "Noch nichts zu analysieren";
+"text_of_bestPeriodLabel_in_statistcs_page" = "Bester Zeitraum";
+"text_of_perfectDaysLabel_in_statistcs_page" = "Perfekte Tage";
+"text_of_completedTrackersLabel_in_statistcs_page" = "Abgeschlossene Tracker";
+"text_of_averageValueLabel_in_statistcs_page" = "Durchschnittswert";

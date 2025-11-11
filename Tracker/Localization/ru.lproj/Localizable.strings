@@ -62,3 +62,9 @@
 "text_of_uncompleted_section_on_filters_page" = "Не завершенные";
 "title_of_filtersViewController" = "Фильтры";
 "text_of_nothingNotFoundLabel_on_trackers_page" = "Ничего не найдено";
+"header_of_statistics_page" = "Статистика";
+"text_of_nothingToAnalyzeLabel_on_statistics_page" = "Анализировать пока нечего";
+"text_of_bestPeriodLabel_in_statistcs_page" = "Лучший период";
+"text_of_perfectDaysLabel_in_statistcs_page" = "Идеальные дни";
+"text_of_completedTrackersLabel_in_statistcs_page" = "Трекеров завершено";
+"text_of_averageValueLabel_in_statistcs_page" = "Среднее значение";

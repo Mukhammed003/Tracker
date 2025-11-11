@@ -20,6 +20,7 @@ final class TrackersViewController: UIViewController {
     private lazy var filterButton: UIButton = makeFilterButton()
     private lazy var addTrackerButton: UIButton = makeAddTrackerButton()
     
+    // datePicker
     private lazy var datePickerView: UIView = makeDatePickerView()
     private lazy var datePicker = UIDatePicker()
     private lazy var datePickerLabel = UILabel()
@@ -56,6 +57,10 @@ final class TrackersViewController: UIViewController {
         
         filterTrackersByDate()
         showNeedScreen()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.calculateEverythingAndSendToUserDefaults()
+        }
     }
     
     @objc private func clcickToFilterButton() {
@@ -234,7 +239,6 @@ final class TrackersViewController: UIViewController {
     }
     
     private func setupSplashView() {
-        
         splashContainerView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(splashContainerView)
         
@@ -461,7 +465,6 @@ final class TrackersViewController: UIViewController {
         datePicker.alpha = 0.011
         datePicker.isUserInteractionEnabled = true
         
-        // Лейбл с текущей датой
         let dateLabel = UILabel()
         dateLabel.textColor = .black
         dateLabel.font = .systemFont(ofSize: 16)
@@ -531,6 +534,10 @@ final class TrackersViewController: UIViewController {
         }
         trackerRecordStore.addNewTrackerRecord(tracker: trackerCoreData, date: selectedDate)
         print(trackerRecordStore.debugPrintAllRecords())
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.calculateEverythingAndSendToUserDefaults()
+        }
     }
     
     private func trackerUncompleted(trackerID: UInt) {
@@ -541,6 +548,10 @@ final class TrackersViewController: UIViewController {
         
         trackerRecordStore.deleteTrackerRecordByIdAndDate(Int64(trackerID), date: selectedDate)
         print(trackerRecordStore.debugPrintAllRecords())
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.calculateEverythingAndSendToUserDefaults()
+        }
     }
     
     private func filterTrackersByDate() {
@@ -603,6 +614,10 @@ final class TrackersViewController: UIViewController {
         
         let deleteAction = UIAlertAction(title: textOfDeleteButton, style: .destructive) { [weak self] _ in
             self?.deleteTracker(trackerId: trackerId, header: header)
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self?.calculateEverythingAndSendToUserDefaults()
+            }
         }
         
         let cancelAction = UIAlertAction(title: textOfCancelButton, style: .cancel)
@@ -736,6 +751,126 @@ final class TrackersViewController: UIViewController {
         }
         
         collectionViewForTrackers.reloadData()
+    }
+    
+    // For statistics process
+    
+    private func calculateEverythingAndSendToUserDefaults()  {
+        let bestPeriod = calculateTheBestPeriod()
+        let perfectDays = calculateThePerfectDays()
+        let completedTrackers = calculateCompletedTrackers()
+        let averagevalue = calculateAverageValue()
+        
+        storage.saveValuesForStatistics(bestPeriodValue: bestPeriod, perfectDaysValue: perfectDays, completedTrackersValue: completedTrackers, averageValue: averagevalue)
+        
+        print("Best period: \(bestPeriod). \n Perfect days: \(perfectDays). \n Completed trackers: \(completedTrackers). \n Average value: \(averagevalue).")
+    }
+    
+    private func calculateTheBestPeriod() -> Double {
+        var bestPeriod = 0
+        let calendar = Calendar.current
+        
+        let groupedById = Dictionary(grouping: completedTrackers) { $0.id }
+        let sortedByDatePerId = groupedById.mapValues { $0.sorted { $0.date < $1.date } }
+        
+        for (id, sortedRecords) in sortedByDatePerId {
+            guard let weekDays = scheduleForTracker(id: id) else { continue }
+            var maxStreak = 0
+            var currentStreak = 0
+            var previousDate: Date? = nil
+            
+            for record in sortedRecords {
+                if let prevDate = previousDate {
+                    // Ищем ближайшую дату, которая разрешена по расписанию
+                    var nextAllowedDate: Date? = nil
+                    for i in 1...7 {
+                        let candidateDate = calendar.date(byAdding: .day, value: i, to: prevDate)!
+                        let weekday = calendar.component(.weekday, from: candidateDate)
+                        let adjustedWeekday = weekday == 1 ? 7 : weekday - 1
+                        if weekDays.contains(where: { $0.dayNumber == adjustedWeekday }) {
+                            nextAllowedDate = candidateDate
+                            break
+                        }
+                    }
+                    
+                    if let nextDate = nextAllowedDate,
+                       calendar.isDate(record.date, inSameDayAs: nextDate) {
+                        currentStreak += 1
+                    } else {
+                        currentStreak = 1
+                    }
+                } else {
+                    currentStreak = 1
+                }
+                
+                previousDate = record.date
+                maxStreak = max(maxStreak, currentStreak)
+            }
+            
+            bestPeriod = max(bestPeriod, maxStreak)
+        }
+        return Double(bestPeriod)
+    }
+    
+    private func scheduleForTracker(id: UInt) -> [DaysOfWeek]? {
+        for category in categories {
+            if let tracker = category.listOfTrackers.first(where: { $0.id == id }) {
+                return tracker.schedule
+            }
+        }
+        return nil
+    }
+    
+    private func calculateThePerfectDays() -> Double {
+        var perfectDays: Double = 0
+        var dictionaryWeekendDays: [Int: Int] = [1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0]
+        
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        
+        for category in categories {
+            for tracker in category.listOfTrackers {
+                guard let schedule = tracker.schedule else { continue }
+                for day in schedule {
+                    let dayNumber = day.dayNumber
+                    dictionaryWeekendDays[dayNumber, default: 0] += 1
+                }
+            }
+        }
+        
+        let groupedByDay = Dictionary(grouping: completedTrackers) {record in
+            record.date.startOfDayUTC
+        }
+        
+        groupedByDay.forEach { date, records in
+            let weekDay = calendar.component(.weekday, from: date)
+            let adjustedWeekDay = weekDay == 1 ? 7 : weekDay - 1
+            if dictionaryWeekendDays[adjustedWeekDay] == records.count {
+                perfectDays += 1
+            }
+        }
+        
+        return perfectDays
+    }
+    
+    // 100001 2025-10-16, 2025-10-23, 2025-10-30, 2025-11-05
+    // wednesday, thursday, friday
+    
+    private func calculateCompletedTrackers() -> Double {
+        return Double(completedTrackers.count)
+    }
+    
+    private func calculateAverageValue() -> Double {
+        
+        let groupedByDay = Dictionary(grouping: completedTrackers) {record in
+            record.date.startOfDayUTC
+        }
+        
+        let dailyCounts = groupedByDay.map { $0.value.count }
+        guard !dailyCounts.isEmpty else { return 0 }
+        let total = dailyCounts.reduce(0, +)
+        
+        return Double(total) / Double(dailyCounts.count)
     }
 }
 
