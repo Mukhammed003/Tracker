@@ -32,7 +32,7 @@ final class ScheduleViewController: UIViewController {
         
         view.backgroundColor = .systemBackground
         
-        let titleSchedulePage = NSLocalizedString("title_of_scheduleViewController", comment: "")
+        let titleSchedulePage = NSLocalizedString("schedule.title", comment: "")
         
         title = titleSchedulePage
         
@@ -86,8 +86,8 @@ final class ScheduleViewController: UIViewController {
             dismiss(animated: true)
         } else {
             
-            let titleOfErrorAlert = NSLocalizedString("title_of_error_alert_on_schedule_page", comment: "")
-            let textOfButtonOnErrorAlert = NSLocalizedString("text_of_button_on_error_alert_on_schedule_page", comment: "")
+            let titleOfErrorAlert = NSLocalizedString("schedule.errorAlert.title", comment: "")
+            let textOfButtonOnErrorAlert = NSLocalizedString("schedule.errorAlert.buttonText", comment: "")
             
             let alert = UIAlertController(
                 title: titleOfErrorAlert,
@@ -147,7 +147,7 @@ final class ScheduleViewController: UIViewController {
     private func makeReadyButton() -> UIButton {
         let readyButton = UIButton(type: .custom)
         
-        let textOfReadyButton = NSLocalizedString("text_of_readyButton_on_schedule_page", comment: "")
+        let textOfReadyButton = NSLocalizedString("schedule.readyButton.text", comment: "")
         
         readyButton.setTitle(textOfReadyButton, for: .normal)
         readyButton.setTitleColor(.systemBackground, for: .normal)

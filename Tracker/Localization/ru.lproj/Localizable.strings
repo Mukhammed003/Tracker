@@ -1,70 +1,101 @@
-"text_on_first_onboarding_page" = "Отслеживайте только то, что хотите";
-"text_on_second_onboarding_page" = "Даже если это не литры воды и йога";
-"button_text_on_onboarding_pages" = "Вот это технологии!";
-"header_of_trackers_page" = "Трекеры";
-"locale_identifier_of_datePicker" = "ru_RU";
-"placeholder_of_searchField_on_trackers_page" = "Поиск";
-"text_of_notFoundLabel_on_trackers_page" = "Что будем отслеживать?";
-"title_of_firstTabBarItem" = "Трекеры";
-"title_of_secondTabBarItem" = "Статистика";
-"title_of_newHabitViewController" = "Новая привычка";
-"placeholder_of_trackerNameTextField_on_newHabit_page" = "Введите название трекера";
-"text_of_category_section_on_newHabit_page" = "Категория";
-"text_of_schedule_section_on_newHabit_page" = "Расписание";
-"header_of_collectionViewForEmojis_on_newHabit_page" = "Emoji";
-"header_of_collectionViewForColors_on_newhabit_page" = "Цвет";
-"title_of_cancelButton_on_newHabit_page" = "Отменить";
-"title_of_createButton_on_newHabit_page" = "Создать";
-"title_of_categoryViewController" = "Категория";
-"text_of_notFoundLabel_on_category_page" = "Привычки и события можно объединить по смыслу";
-"text_of_addCategoryButton_on_category_page" = "Добавить категорию";
-"title_of_newCategoryViewController" = "Новая категория";
-"placeholder_of_categoryNameTextField_on_newCategory_page" = "Введите название категории";
-"text_of_readyButton_on_newCategory_page" = "Готово";
-"title_of_scheduleViewController" = "Расписание";
-"monday_on_schedule_page" = "Понедельник";
-"tuesday_on_schedule_page" = "Вторник";
-"wednesday_on_schedule_page" = "Среда";
-"thursday_on_schedule_page" = "Четверг";
-"friday_on_schedule_page" = "Пятница";
-"saturday_on_schedule_page" = "Суббота";
-"sunday_on_schedule_page" = "Воскресенье";
-"text_of_readyButton_on_schedule_page" = "Готово";
-"daysOfWeek_case_monday" = "Пн";                       // Constants -> DaysOfWeek -> var localized
-"daysOfWeek_case_tuesday" = "Вт";                      // Constants -> DaysOfWeek -> var localized
-"daysOfWeek_case_wednesday" = "Ср";                    // Constants -> DaysOfWeek -> var localized
-"daysOfWeek_case_thursday" = "Чт";                     // Constants -> DaysOfWeek -> var localized
-"daysOfWeek_case_friday" = "Пт";                       // Constants -> DaysOfWeek -> var localized
-"daysOfWeek_case_saturday" = "Сб";                     // Constants -> DaysOfWeek -> var localized
-"daysOfWeek_case_sunday" = "Вс";                       // Constants -> DaysOfWeek -> var localized
-"text_for_daysOfWeek_allDays" = "Каждый день";
-"text_for_daysOfWeek_workingDays" = "Рабочие дни";
-"text_for_daysOfWeek_weekendDays" = "Выходные дни";
-"title_of_error_alert_on_newCategory_page" = "Ошибка";
-"message_of_error_alert_on_newCategory_page" = "Такая категория уже существует.";
-"text_of_button_on_error_alert_on_newCategory_page" = "ОК";
-"title_of_error_alert_on_newHabit_page" = "Ошибка";
-"message_of_error_alert_on_newHabit_page" = "Такой трекер уже существует.";
-"text_of_button_on_error_alert_on_newHabit_page" = "ОК";
-"title_of_error_alert_on_schedule_page" = "Надо выбрать хотябы бы один день.";
-"text_of_button_on_error_alert_on_schedule_page" = "ОК";
-"text_of_edit_section_in_context_menu" = "Редактировать";
-"text_of_delete_section_in_context_menu" = "Удалить";
-"title_of_editHabitViewController" = "Редактирование привычки";
-"title_of_saveButton_on_editHabit_page" = "Сохранить";
-"title_of_deleteAlert" = "Уверены что хотите удалить трекер?";
-"deleteButton_of_deleteAlert" = "Удалить";
-"cancelButton_of_deleteAlert" = "Отменить";
-"text_of_filterButton_on_trackers_page" = "Фильтры";
-"text_of_allTrackers_section_on_filters_page" = "Все трекеры";
-"text_of_forToday_section_on_filters_page" = "Трекеры на сегодня";
-"text_of_completed_section_on_filters_page" = "Завершенные";
-"text_of_uncompleted_section_on_filters_page" = "Не завершенные";
-"title_of_filtersViewController" = "Фильтры";
-"text_of_nothingNotFoundLabel_on_trackers_page" = "Ничего не найдено";
-"header_of_statistics_page" = "Статистика";
-"text_of_nothingToAnalyzeLabel_on_statistics_page" = "Анализировать пока нечего";
-"text_of_bestPeriodLabel_in_statistcs_page" = "Лучший период";
-"text_of_perfectDaysLabel_in_statistcs_page" = "Идеальные дни";
-"text_of_completedTrackersLabel_in_statistcs_page" = "Трекеров завершено";
-"text_of_averageValueLabel_in_statistcs_page" = "Среднее значение";
+// MARK: - Onboarding
+"onboarding.firstPage.text" = "Отслеживайте только то, что хотите";
+"onboarding.secondPage.text" = "Даже если это не литры воды и йога";
+"onboarding.button.text" = "Вот это технологии!";
+
+// MARK: - Trackers (Main)
+"trackers.header.title" = "Трекеры";
+"trackers.datePicker.localeIdentifier" = "ru_RU";
+"trackers.searchField.placeholder" = "Поиск";
+"trackers.notFoundLabel.text" = "Что будем отслеживать?";
+"trackers.filterButton.text" = "Фильтры";
+"trackers.nothingFoundLabel.text" = "Ничего не найдено";
+"trackers.deleteAlert.title" = "Уверены что хотите удалить трекер?";
+
+// MARK: - Tab Bar
+"tabBar.firstItem.title" = "Трекеры";
+"tabBar.secondItem.title" = "Статистика";
+
+// MARK: - New Habit
+"newHabit.title" = "Новая привычка";
+"newHabit.textField.placeholder" = "Введите название трекера";
+"newHabit.categorySection.text" = "Категория";
+"newHabit.scheduleSection.text" = "Расписание";
+"newHabit.emojiCollection.header" = "Emoji";
+"newHabit.colorCollection.header" = "Цвет";
+"newHabit.cancelButton.title" = "Отменить";
+"newHabit.createButton.title" = "Создать";
+"newHabit.errorAlert.message" = "Такой трекер уже существует.";
+
+// MARK: - Category
+"category.title" = "Категория";
+"category.notFoundLabel.text" = "Привычки и события можно объединить по смыслу";
+"category.addButton.text" = "Добавить категорию";
+"category.deleteAlert.title" = "Уверены что хотите удалить категорию?";
+
+// MARK: - New Category
+"newCategory.title" = "Новая категория";
+"newCategory.textField.placeholder" = "Введите название категории";
+"newCategory.readyButton.text" = "Готово";
+"newCategory.errorAlert.title" = "Ошибка";
+"newCategory.errorAlert.message" = "Такая категория уже существует.";
+"newCategory.errorAlert.buttonText" = "ОК";
+
+// MARK: - Schedule
+"schedule.title" = "Расписание";
+"schedule.monday" = "Понедельник";
+"schedule.tuesday" = "Вторник";
+"schedule.wednesday" = "Среда";
+"schedule.thursday" = "Четверг";
+"schedule.friday" = "Пятница";
+"schedule.saturday" = "Суббота";
+"schedule.sunday" = "Воскресенье";
+"schedule.readyButton.text" = "Готово";
+"schedule.errorAlert.title" = "Надо выбрать хотябы бы один день.";
+"schedule.errorAlert.buttonText" = "ОК";
+
+// MARK: - Days of Week (Short)
+"daysOfWeek.monday.short" = "Пн";
+"daysOfWeek.tuesday.short" = "Вт";
+"daysOfWeek.wednesday.short" = "Ср";
+"daysOfWeek.thursday.short" = "Чт";
+"daysOfWeek.friday.short" = "Пт";
+"daysOfWeek.saturday.short" = "Сб";
+"daysOfWeek.sunday.short" = "Вс";
+"daysOfWeek.allDays" = "Каждый день";
+"daysOfWeek.workingDays" = "Рабочие дни";
+"daysOfWeek.weekendDays" = "Выходные дни";
+
+// MARK: - Edit Habit
+"editHabit.title" = "Редактирование привычки";
+"editHabit.saveButton.title" = "Сохранить";
+
+// MARK: - Edit Category
+"editCategory.title" = "Редактирование категории";
+
+// MARK: - Context Menu
+"contextMenu.editSection.text" = "Редактировать";
+"contextMenu.deleteSection.text" = "Удалить";
+
+// MARK: - Delete Alert
+"deleteAlert.deleteButton.text" = "Удалить";
+"deleteAlert.cancelButton.text" = "Отменить";
+
+// MARK: - Error Alerts (Habit)
+"newHabit.errorAlert.title" = "Ошибка";
+"newHabit.errorAlert.buttonText" = "ОК";
+
+// MARK: - Filters
+"filters.title" = "Фильтры";
+"filters.allTrackersSection.text" = "Все трекеры";
+"filters.todayTrackersSection.text" = "Трекеры на сегодня";
+"filters.completedSection.text" = "Завершенные";
+"filters.uncompletedSection.text" = "Не завершенные";
+
+// MARK: - Statistics
+"statistics.header.title" = "Статистика";
+"statistics.nothingToAnalyzeLabel.text" = "Анализировать пока нечего";
+"statistics.bestPeriodLabel.text" = "Лучший период";
+"statistics.perfectDaysLabel.text" = "Идеальные дни";
+"statistics.completedTrackersLabel.text" = "Трекеров завершено";
+"statistics.averageValueLabel.text" = "Среднее значение";

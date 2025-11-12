@@ -22,8 +22,8 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     
     private let listOfSections: [String] = {
         
-        let textForCategorySection = NSLocalizedString("text_of_category_section_on_newHabit_page", comment: "")
-        let textForScheduleSection = NSLocalizedString("text_of_schedule_section_on_newHabit_page", comment: "")
+        let textForCategorySection = NSLocalizedString("newHabit.categorySection.text", comment: "")
+        let textForScheduleSection = NSLocalizedString("newHabit.scheduleSection.text", comment: "")
         
         return [
             textForCategorySection,
@@ -76,7 +76,7 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
         
         view.backgroundColor = .systemBackground
         
-        let titleOfNewHabitViewController = NSLocalizedString("title_of_newHabitViewController", comment: "")
+        let titleOfNewHabitViewController = NSLocalizedString("newHabit.title", comment: "")
         
         title = titleOfNewHabitViewController
         
@@ -178,16 +178,16 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     private func applyMode() {
         switch mode {
         case .create:
-            let titleOfNewHabitViewController = NSLocalizedString("title_of_newHabitViewController", comment: "")
-            let textOfCreateButton = NSLocalizedString("title_of_createButton_on_newHabit_page", comment: "")
+            let titleOfNewHabitViewController = NSLocalizedString("newHabit.title", comment: "")
+            let textOfCreateButton = NSLocalizedString("newHabit.createButton.title", comment: "")
             
             title = titleOfNewHabitViewController
             createButton.setTitle(textOfCreateButton, for: .normal)
             editInfoLabel.isHidden = true
             
         case .edit(let tracker, let headerOfCategory, let textCountOfCompletedDays):
-            let titleOfEditHabitViewController = NSLocalizedString("title_of_editHabitViewController", comment: "")
-            let textOfCreateButton = NSLocalizedString("title_of_saveButton_on_editHabit_page", comment: "")
+            let titleOfEditHabitViewController = NSLocalizedString("editHabit.title", comment: "")
+            let textOfCreateButton = NSLocalizedString("editHabit.saveButton.title", comment: "")
             
             title = titleOfEditHabitViewController
             createButton.setTitle(textOfCreateButton, for: .normal)
@@ -348,7 +348,7 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     private func makeTrackerNameTextField() -> UITextField {
         let trackerNameTextField = UITextField()
         
-        let trackerNameTextFieldPlaceholder = NSLocalizedString("placeholder_of_trackerNameTextField_on_newHabit_page", comment: "")
+        let trackerNameTextFieldPlaceholder = NSLocalizedString("newHabit.textField.placeholder", comment: "")
         
         trackerNameTextField.placeholder = trackerNameTextFieldPlaceholder
         trackerNameTextField.backgroundColor = .ypBackground
@@ -375,7 +375,7 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     private func makeCancelButton() -> UIButton {
         let cancelButton = UIButton(type: .custom)
         
-        let textOfCancelButton = NSLocalizedString("title_of_cancelButton_on_newHabit_page", comment: "")
+        let textOfCancelButton = NSLocalizedString("newHabit.cancelButton.title", comment: "")
         
         cancelButton.setTitle(textOfCancelButton, for: .normal)
         cancelButton.setTitleColor(.ypRed, for: .normal)
@@ -462,9 +462,9 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
     
     private func showDuplicateAlert() {
         
-        let titleOfErrorAlert = NSLocalizedString("title_of_error_alert_on_newHabit_page", comment: "")
-        let messageOfErrorAlert = NSLocalizedString("message_of_error_alert_on_newHabit_page", comment: "")
-        let textOfButtonOnErrorAlert = NSLocalizedString("text_of_button_on_error_alert_on_newHabit_page", comment: "")
+        let titleOfErrorAlert = NSLocalizedString("newHabit.errorAlert.title", comment: "")
+        let messageOfErrorAlert = NSLocalizedString("newHabit.errorAlert.message", comment: "")
+        let textOfButtonOnErrorAlert = NSLocalizedString("newHabit.errorAlert.buttonText", comment: "")
         
         let alert = UIAlertController(
             title: titleOfErrorAlert,
@@ -506,13 +506,16 @@ final class NewHabitViewController: UIViewController, UITextFieldDelegate, UICol
         
         let allDays: [DaysOfWeek] = [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]
         
-        if Set(days) == Set(allDays) {
+        let daySet = Set(days)
+
+        switch daySet {
+        case Set(allDays):
             return Constants.allDaysText
-        } else if Set(days) == Set([.monday, .tuesday, .wednesday, .thursday, .friday]) {
+        case Set([.monday, .tuesday, .wednesday, .thursday, .friday]):
             return Constants.workingDaysText
-        } else if Set(days) == Set([.saturday, .sunday]) {
+        case Set([.saturday, .sunday]):
             return Constants.weekendDaysText
-        } else {
+        default:
             return days.map { $0.localized }.joined(separator: ", ")
         }
     }
@@ -706,8 +709,8 @@ extension NewHabitViewController: UICollectionViewDataSource {
             return UICollectionReusableView()
         }
         
-        let headerTextOfCollectionViewForEmojis = NSLocalizedString("header_of_collectionViewForEmojis_on_newHabit_page", comment: "")
-        let headerTextOfCollectionViewForColors = NSLocalizedString("header_of_collectionViewForColors_on_newhabit_page", comment: "")
+        let headerTextOfCollectionViewForEmojis = NSLocalizedString("newHabit.emojiCollection.header", comment: "")
+        let headerTextOfCollectionViewForColors = NSLocalizedString("newHabit.colorCollection.header", comment: "")
         
         view.configure(title: collectionView ==
                        collectionViewForEmojis

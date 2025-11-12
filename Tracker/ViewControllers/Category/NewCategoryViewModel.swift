@@ -5,17 +5,24 @@
 //  Created by Muhammed Nurmukhanov on 11.11.2025.
 //
 
-final class NewCategoryViewModel {
+enum Mode {
+    case create
+    case edit(oldHeader: String)
+}
+
+protocol NewCategoryViewModelProtocol {
+    var oldCategoryName: String? { get set }
+    var mode: Mode { get }
     
-    enum Mode {
-        case create
-        case edit(oldHeader: String)
-    }
+    func isCategoryExists(_ name: String) -> Bool
+    func saveCategory(_ name: String)
+}
+
+final class NewCategoryViewModel: NewCategoryViewModelProtocol {
+    var oldCategoryName: String?
     
     let mode: Mode
     private let categoryStore: TrackerCategoryStore
-    
-    var oldCategoryName: String = ""
     
     init(categoryStore: TrackerCategoryStore, mode: Mode) {
         self.categoryStore = categoryStore

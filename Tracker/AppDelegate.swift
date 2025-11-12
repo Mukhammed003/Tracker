@@ -16,9 +16,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         UserDefaults.standard.removeObject(forKey: Constants.selectedFilterIndex)
         
-        if let configuration = AppMetricaConfiguration(apiKey: "44ead0c0-d337-4a20-ae21-add5919408fd") {
-            AppMetrica.activate(with: configuration)
-        }
+        AnalyticsService.activate()
         
         DaysValueTransformer.register()
         ColorTransformer.register()

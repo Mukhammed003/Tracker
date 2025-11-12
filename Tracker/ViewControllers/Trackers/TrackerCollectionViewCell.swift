@@ -63,8 +63,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell, UIContextMenuIntera
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         guard let trackerID = trackerID else { return nil }
         
-        let textOfEditSection = NSLocalizedString("text_of_edit_section_in_context_menu", comment: "")
-        let textOfEditDeleteSection = NSLocalizedString("text_of_delete_section_in_context_menu", comment: "")
+        let textOfEditSection = NSLocalizedString("contextMenu.editSection.text", comment: "")
+        let textOfEditDeleteSection = NSLocalizedString("contextMenu.deleteSection.text", comment: "")
         
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
             guard let self else { return nil }

@@ -9,7 +9,13 @@ import AppMetricaCore
 
 final class AnalyticsService {
     
-    func addEvent(eventName withName: String, params: [AnyHashable: Any]) {
+    static func activate() {
+        if let configuration = AppMetricaConfiguration(apiKey: "44ead0c0-d337-4a20-ae21-add5919408fd") {
+            AppMetrica.activate(with: configuration)
+        }
+    }
+    
+    static func addEvent(eventName withName: String, params: [AnyHashable: Any]) {
         
         AppMetrica.reportEvent(
             name: withName,

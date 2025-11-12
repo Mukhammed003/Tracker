@@ -25,7 +25,7 @@ final class TabBarController: UITabBarController {
         let trackerViewController = TrackersViewController()
         let firstNav = UINavigationController(rootViewController: trackerViewController)
         
-        let titleOfFirstTabBarItem = NSLocalizedString("title_of_firstTabBarItem", comment: "")
+        let titleOfFirstTabBarItem = NSLocalizedString("tabBar.firstItem.title", comment: "")
         
         firstNav.tabBarItem = UITabBarItem(
             title: titleOfFirstTabBarItem,
@@ -35,7 +35,7 @@ final class TabBarController: UITabBarController {
         let statisticsViewController = StatisticsViewController()
         let secondNav = UINavigationController(rootViewController: statisticsViewController)
         
-        let titleOfSecondTabBarItem = NSLocalizedString("title_of_secondTabBarItem", comment: "")
+        let titleOfSecondTabBarItem = NSLocalizedString("tabBar.secondItem.title", comment: "")
         
         secondNav.tabBarItem = UITabBarItem(
             title: titleOfSecondTabBarItem,

@@ -12,10 +12,11 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     var onNewCategoryCreated: ((String) -> Void)?
     var onCategoryEdited: ((String) -> Void)?
     
-    private let viewModel: NewCategoryViewModel
+    private let viewModel: NewCategoryViewModelProtocol
     private var isTextFieldFilled = false
+    private var titleOfNewCategoryViewController: String = ""
     
-    init(viewModel: NewCategoryViewModel) {
+    init(viewModel: NewCategoryViewModelProtocol) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -33,12 +34,14 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
         if case .edit = viewModel.mode {
             categoryNameTextField.text = viewModel.oldCategoryName
             isTextFieldFilled = true
+            titleOfNewCategoryViewController = NSLocalizedString("editCategory.title", comment: "")
+            
             updateReadyButtonState()
+        } else {
+            titleOfNewCategoryViewController = NSLocalizedString("newCategory.title", comment: "")
         }
         
         view.backgroundColor = .systemBackground
-        
-        let titleOfNewCategoryViewController = NSLocalizedString("title_of_newCategoryViewController", comment: "")
         
         title = titleOfNewCategoryViewController
         
@@ -56,8 +59,8 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
             guard let text = categoryNameTextField.text,
                   !text.trimmingCharacters(in: .whitespaces).isEmpty else { return }
             
-            let titleOfErrorAlert = NSLocalizedString("title_of_error_alert_on_newCategory_page", comment: "")
-            let messageOfErrorAlert = NSLocalizedString("message_of_error_alert_on_newCategory_page", comment: "")
+            let titleOfErrorAlert = NSLocalizedString("newCategory.errorAlert.title", comment: "")
+            let messageOfErrorAlert = NSLocalizedString("newCategory.errorAlert.message", comment: "")
             
             if viewModel.isCategoryExists(text) {
                 showAlert(title: titleOfErrorAlert, message: messageOfErrorAlert)
@@ -70,8 +73,8 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
             guard let text = categoryNameTextField.text,
                   !text.trimmingCharacters(in: .whitespaces).isEmpty else { return }
             
-            let titleOfErrorAlert = NSLocalizedString("title_of_error_alert_on_newCategory_page", comment: "")
-            let messageOfErrorAlert = NSLocalizedString("message_of_error_alert_on_newCategory_page", comment: "")
+            let titleOfErrorAlert = NSLocalizedString("newCategory.errorAlert.title", comment: "")
+            let messageOfErrorAlert = NSLocalizedString("newCategory.errorAlert.message", comment: "")
             
             if viewModel.isCategoryExists(text) {
                 showAlert(title: titleOfErrorAlert, message: messageOfErrorAlert)
@@ -115,7 +118,7 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     private func makeReadyButton() -> UIButton {
         let readyButton = UIButton(type: .custom)
         
-        let textOfReadyButton = NSLocalizedString("text_of_readyButton_on_newCategory_page", comment: "")
+        let textOfReadyButton = NSLocalizedString("newCategory.readyButton.text", comment: "")
         
         readyButton.setTitle(textOfReadyButton, for: .normal)
         readyButton.setTitleColor(.systemBackground, for: .normal)
@@ -132,7 +135,7 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     private func makeCategoryNameTextField() -> UITextField {
         let categoryNameTextField = UITextField()
         
-        let categoryNameTextFieldPlaceholder = NSLocalizedString("placeholder_of_categoryNameTextField_on_newCategory_page", comment: "")
+        let categoryNameTextFieldPlaceholder = NSLocalizedString("newCategory.textField.placeholder", comment: "")
         
         categoryNameTextField.placeholder = categoryNameTextFieldPlaceholder
         categoryNameTextField.backgroundColor = .ypBackground
@@ -158,7 +161,7 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     private func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         
-        let textOfButtonOnErrorAlert = NSLocalizedString("text_of_button_on_error_alert_on_newCategory_page", comment: "")
+        let textOfButtonOnErrorAlert = NSLocalizedString("newCategory.errorAlert.buttonText", comment: "")
         
         alert.addAction(UIAlertAction(title: textOfButtonOnErrorAlert, style: .default))
         present(alert, animated: true)

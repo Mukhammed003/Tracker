@@ -37,7 +37,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let params: [AnyHashable: Any] = ["Event": "open", "Screen": "Any", "Item": ""]
         let eventName = "app_opened"
         
-        analyticsService.addEvent(eventName: eventName, params: params)
+        AnalyticsService.addEvent(eventName: eventName, params: params)
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
@@ -60,7 +60,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let params: [AnyHashable: Any] = ["Event": "close", "Screen": "Main", "Item": ""]
         let eventName = "app_closed"
         
-        analyticsService.addEvent(eventName: eventName, params: params)
+        AnalyticsService.addEvent(eventName: eventName, params: params)
         
         (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
     }

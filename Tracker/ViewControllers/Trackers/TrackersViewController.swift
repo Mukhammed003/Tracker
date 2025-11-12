@@ -41,7 +41,6 @@ final class TrackersViewController: UIViewController {
     private let trackerRecordStore = TrackerRecordStore()
     private let trackerStore = TrackerStore()
     private let storage = Storage.shared
-    private let analyticsService = AnalyticsService()
     private var statisticsManager: StatisticsManager?
     
     override func viewDidLoad() {
@@ -70,7 +69,7 @@ final class TrackersViewController: UIViewController {
         let params: [AnyHashable: Any] = ["Event": "click", "Screen": "Main", "Item": "filter"]
         let eventName = "filter"
         
-        analyticsService.addEvent(eventName: eventName, params: params)
+        AnalyticsService.addEvent(eventName: eventName, params: params)
         
         let filtersVc = FiltersViewController()
         let navController = UINavigationController(rootViewController: filtersVc)
@@ -100,7 +99,7 @@ final class TrackersViewController: UIViewController {
         let params: [AnyHashable: Any] = ["Event": "click", "Screen": "Main", "Item": "add_track"]
         let eventName = "add_track"
         
-        analyticsService.addEvent(eventName: eventName, params: params)
+        AnalyticsService.addEvent(eventName: eventName, params: params)
         
         
         let newHabitVc = NewHabitViewController(mode: .create)
@@ -164,7 +163,7 @@ final class TrackersViewController: UIViewController {
             let params: [AnyHashable: Any] = ["Event": "click", "Screen": "Main", "Item": "track"]
             let eventName = "track_completed"
             
-            analyticsService.addEvent(eventName: eventName, params: params)
+            AnalyticsService.addEvent(eventName: eventName, params: params)
             
             trackerCompleted(trackerID: trackerID)
         } else {
@@ -203,7 +202,7 @@ final class TrackersViewController: UIViewController {
     
     private func setupNavBar() {
         
-        let titleOfNavBarOnTrackersPage = NSLocalizedString("header_of_trackers_page", comment: "")
+        let titleOfNavBarOnTrackersPage = NSLocalizedString("trackers.header.title", comment: "")
         
         title = titleOfNavBarOnTrackersPage
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -291,7 +290,7 @@ final class TrackersViewController: UIViewController {
         collectionViewForTrackers.contentInset = UIEdgeInsets(
                 top: 0,
                 left: 0,
-                bottom: 16 + 50, 
+                bottom: Constants.desiredOffsetFromFilterButton, 
                 right: 0
             )
         collectionViewForTrackers.scrollIndicatorInsets = collectionViewForTrackers.contentInset
@@ -318,7 +317,7 @@ final class TrackersViewController: UIViewController {
     private func makeFilterButton() -> UIButton {
         let filterButton = UIButton(type: .custom)
         
-        let textOfFilterButton = NSLocalizedString("text_of_filterButton_on_trackers_page", comment: "")
+        let textOfFilterButton = NSLocalizedString("trackers.filterButton.text", comment: "")
         
         filterButton.setTitle(textOfFilterButton, for: .normal)
         filterButton.setTitleColor(.systemBackground, for: .normal)
@@ -345,7 +344,7 @@ final class TrackersViewController: UIViewController {
     }
     
     private func makeSearchField() -> UISearchController {
-        let placeholderOfSearchField = NSLocalizedString("placeholder_of_searchField_on_trackers_page", comment: "")
+        let placeholderOfSearchField = NSLocalizedString("trackers.searchField.placeholder", comment: "")
         
         let searchField = createSearchTextField(placeholderText: placeholderOfSearchField)
         
@@ -362,7 +361,7 @@ final class TrackersViewController: UIViewController {
     
     private func makeNotFoundLabel() -> UILabel {
         
-        let textOfNotFoundLabel = NSLocalizedString("text_of_notFoundLabel_on_trackers_page", comment: "")
+        let textOfNotFoundLabel = NSLocalizedString("trackers.notFoundLabel.text", comment: "")
         
         let notFoundLabel = createUILabel(
             textOfLabel: textOfNotFoundLabel,
@@ -392,7 +391,7 @@ final class TrackersViewController: UIViewController {
     
     private func makeNothingNotFoundLabel() -> UILabel {
         
-        let textOfNothingNotFoundLabel = NSLocalizedString("text_of_nothingNotFoundLabel_on_trackers_page", comment: "")
+        let textOfNothingNotFoundLabel = NSLocalizedString("trackers.nothingFoundLabel.text", comment: "")
         
         let nothingNotFoundLabel = createUILabel(
             textOfLabel: textOfNothingNotFoundLabel,
@@ -454,7 +453,7 @@ final class TrackersViewController: UIViewController {
         let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date
         datePicker.preferredDatePickerStyle = .compact
-        datePicker.locale = Locale(identifier: NSLocalizedString("locale_identifier_of_datePicker", comment: ""))
+        datePicker.locale = Locale(identifier: NSLocalizedString("trackers.datePicker.localeIdentifier", comment: ""))
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         
         container.addSubview(datePicker)
@@ -603,9 +602,9 @@ final class TrackersViewController: UIViewController {
     // For context menu process
     
     private func showDeleteAlert(for trackerId: Int64, header: String) {
-        let titleOfDeleteAlert = NSLocalizedString("title_of_deleteAlert", comment: "")
-        let textOfDeleteButton = NSLocalizedString("deleteButton_of_deleteAlert", comment: "")
-        let textOfCancelButton = NSLocalizedString("cancelButton_of_deleteAlert", comment: "")
+        let titleOfDeleteAlert = NSLocalizedString("trackers.deleteAlert.title", comment: "")
+        let textOfDeleteButton = NSLocalizedString("deleteAlert.deleteButton.text", comment: "")
+        let textOfCancelButton = NSLocalizedString("deleteAlert.cancelButton.text", comment: "")
         
         let alert = UIAlertController(
             title: titleOfDeleteAlert,
@@ -753,8 +752,6 @@ final class TrackersViewController: UIViewController {
         
         collectionViewForTrackers.reloadData()
     }
-    
-    // For statistics process
 }
 
 extension TrackersViewController: UISearchResultsUpdating {
@@ -842,14 +839,14 @@ extension TrackersViewController: UICollectionViewDataSource {
                     let params: [AnyHashable: Any] = ["Event": "click", "Screen": "Main", "Item": "edit"]
                     let eventName = "edit"
                     
-                    self?.analyticsService.addEvent(eventName: eventName, params: params)
+                    AnalyticsService.addEvent(eventName: eventName, params: params)
                     
                     self?.openEditingPageForTracker(tracker: tracker, headerOfCategory: headerOfCategory, textCountOfCompletedDays: numberOfDays)
                 case .delete:
                     let params: [AnyHashable: Any] = ["Event": "click", "Screen": "Main", "Item": "delete"]
                     let eventName = "delete"
                     
-                    self?.analyticsService.addEvent(eventName: eventName, params: params)
+                    AnalyticsService.addEvent(eventName: eventName, params: params)
                     
                     self?.showDeleteAlert(for: Int64(trackerID), header: headerOfCategory)
                 }

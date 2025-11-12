@@ -60,7 +60,7 @@ final class SecondOnboardingViewController: UIViewController {
         
         onboardingLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        let onboardingText = NSLocalizedString("text_on_second_onboarding_page", comment: "")
+        let onboardingText = NSLocalizedString("onboarding.secondPage.text", comment: "")
         
         let attributedString = NSAttributedString(
             string: onboardingText,
@@ -92,7 +92,7 @@ final class SecondOnboardingViewController: UIViewController {
     private func makeOnboardingButton() -> UIButton {
         let onboardingButton = UIButton(type: .custom)
         
-        let textOfOnboardingButton = NSLocalizedString("button_text_on_onboarding_pages", comment: "")
+        let textOfOnboardingButton = NSLocalizedString("onboarding.button.text", comment: "")
         
         onboardingButton.setTitle(textOfOnboardingButton, for: .normal)
         onboardingButton.setTitleColor(.systemBackground, for: .normal)

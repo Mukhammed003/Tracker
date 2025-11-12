@@ -12,17 +12,17 @@ final class CategoryViewController: UIViewController {
     var onCategorySelected: ((String) -> Void)?
     
     private var statisticsManager: StatisticsManager?
-    private let viewModel: CategoryViewModel
+    private var viewModel: CategoryViewModelProtocol
     private let trackerCategoryStore = TrackerCategoryStore()
     private let trackerRecordStore = TrackerRecordStore()
-    
+     
     private lazy var tableViewWithCategories: UITableView = makeTableViewWithCategories()
     private lazy var splashContainerView: UIView = makeSplashContainerView()
     private lazy var addCategoryButton: UIButton = makeAddCategoryButton()
     private lazy var notFoundImage: UIImageView = makeNotFoundImage()
     private lazy var notFoundLabel: UILabel = makeNotFoundLabel()
     
-    init(viewModel: CategoryViewModel) {
+    init(viewModel: CategoryViewModelProtocol) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -38,7 +38,7 @@ final class CategoryViewController: UIViewController {
         
         view.backgroundColor = .systemBackground
         
-        let titleOfCategoryViewController = NSLocalizedString("title_of_categoryViewController", comment: "")
+        let titleOfCategoryViewController = NSLocalizedString("category.title", comment: "")
         
         title = titleOfCategoryViewController
         
@@ -164,7 +164,7 @@ final class CategoryViewController: UIViewController {
     private func makeAddCategoryButton() -> UIButton {
         let addCategoryButton = UIButton(type: .custom)
         
-        let textOfAddCategoryButton = NSLocalizedString("text_of_addCategoryButton_on_category_page", comment: "")
+        let textOfAddCategoryButton = NSLocalizedString("category.addButton.text", comment: "")
         
         addCategoryButton.setTitle(textOfAddCategoryButton, for: .normal)
         addCategoryButton.setTitleColor(.systemBackground, for: .normal)
@@ -202,7 +202,7 @@ final class CategoryViewController: UIViewController {
         notFoundLabel.lineBreakMode = .byWordWrapping
         notFoundLabel.textAlignment = .center
         
-        let notFoundLabelText = NSLocalizedString("text_of_notFoundLabel_on_category_page", comment: "")
+        let notFoundLabelText = NSLocalizedString("category.notFoundLabel.text", comment: "")
         
         let attributedString = NSAttributedString(
             string: notFoundLabelText,
@@ -220,9 +220,9 @@ final class CategoryViewController: UIViewController {
     // Context menu process
     
     private func showDeleteAlert(needHeader: String) {
-        let titleOfDeleteAlert = NSLocalizedString("title_of_deleteAlert", comment: "")
-        let textOfDeleteButton = NSLocalizedString("deleteButton_of_deleteAlert", comment: "")
-        let textOfCancelButton = NSLocalizedString("cancelButton_of_deleteAlert", comment: "")
+        let titleOfDeleteAlert = NSLocalizedString("category.deleteAlert.title", comment: "")
+        let textOfDeleteButton = NSLocalizedString("deleteAlert.deleteButton.text", comment: "")
+        let textOfCancelButton = NSLocalizedString("deleteAlert.cancelButton.text", comment: "")
         
         let alert = UIAlertController(
             title: titleOfDeleteAlert,
@@ -323,8 +323,8 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
-        let textOfEditSection = NSLocalizedString("text_of_edit_section_in_context_menu", comment: "")
-        let textOfEditDeleteSection = NSLocalizedString("text_of_delete_section_in_context_menu", comment: "")
+        let textOfEditSection = NSLocalizedString("contextMenu.editSection.text", comment: "")
+        let textOfEditDeleteSection = NSLocalizedString("contextMenu.deleteSection.text", comment: "")
         
         let configuration = UIContextMenuConfiguration(
             identifier: nil,

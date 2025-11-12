@@ -18,13 +18,13 @@ final class StatisticsViewController: UIViewController {
     
     private lazy var mainStack = UIStackView()
     private lazy var bestPeriod: (view: GradientBorderView, valueLabel: UILabel) =
-        makeStatisticBlock(valueText: "0", descriptionKey: "text_of_bestPeriodLabel_in_statistcs_page", colors: gradientColors)
+        makeStatisticBlock(valueText: "0", descriptionKey: "statistics.bestPeriodLabel.text", colors: gradientColors)
     private lazy var perfectDays: (view: GradientBorderView, valueLabel: UILabel) =
-        makeStatisticBlock(valueText: "0", descriptionKey: "text_of_perfectDaysLabel_in_statistcs_page", colors: gradientColors)
+        makeStatisticBlock(valueText: "0", descriptionKey: "statistics.perfectDaysLabel.text", colors: gradientColors)
     private lazy var completedTrackers: (view: GradientBorderView, valueLabel: UILabel) =
-        makeStatisticBlock(valueText: "0", descriptionKey: "text_of_completedTrackersLabel_in_statistcs_page", colors: gradientColors)
+        makeStatisticBlock(valueText: "0", descriptionKey: "statistics.completedTrackersLabel.text", colors: gradientColors)
     private lazy var averageValueBlock: (view: GradientBorderView, valueLabel: UILabel) =
-        makeStatisticBlock(valueText: "0", descriptionKey: "text_of_averageValueLabel_in_statistcs_page", colors: gradientColors)
+        makeStatisticBlock(valueText: "0", descriptionKey: "statistics.averageValueLabel.text", colors: gradientColors)
     
     // nothing toAnalyze view
     private lazy var nothingToAnalyzeView: UIView = makeNothingToAnalyzeView()
@@ -41,7 +41,14 @@ final class StatisticsViewController: UIViewController {
         setupNavBar()
         setupStatisticsStack()
         setupNothingToAnalyzeView()
+        loadDataForStatistics()
         
+        showNeedScreen()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        loadDataForStatistics()
         showNeedScreen()
     }
     
@@ -56,7 +63,6 @@ final class StatisticsViewController: UIViewController {
         if checkIsExisteAnyDataToAnalyze() {
             nothingToAnalyzeView.isHidden = true
             mainStack.isHidden = false
-            loadDataForStatistics()
         } else {
             nothingToAnalyzeView.isHidden = false
             mainStack.isHidden = true
@@ -70,7 +76,7 @@ final class StatisticsViewController: UIViewController {
     }
     
     private func setupNavBar() {
-        let titleOfNavBarOnStatisticsPage = NSLocalizedString("header_of_statistics_page", comment: "")
+        let titleOfNavBarOnStatisticsPage = NSLocalizedString("statistics.header.title", comment: "")
         
         title = titleOfNavBarOnStatisticsPage
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -97,7 +103,7 @@ final class StatisticsViewController: UIViewController {
             mainStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             mainStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             mainStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            mainStack.heightAnchor.constraint(equalToConstant: 90 * 4 + 12 * 3) // 4 блока + 3 промежутка
+            mainStack.heightAnchor.constraint(equalToConstant: Constants.heightOfFourSubviewsAndMarginsBetweenThem)
         ])
     }
     
@@ -178,7 +184,7 @@ final class StatisticsViewController: UIViewController {
     }
     
     private func makeNothingToAnalyzeLabel() -> UILabel {
-        let textOfNothingToAnalyzeLabel = NSLocalizedString("text_of_nothingToAnalyzeLabel_on_statistics_page", comment: "")
+        let textOfNothingToAnalyzeLabel = NSLocalizedString("statistics.nothingToAnalyzeLabel.text", comment: "")
         
         let nothingToAnalyzeLabel = createUILabel(
             textOfLabel: textOfNothingToAnalyzeLabel,

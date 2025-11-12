@@ -1,70 +1,101 @@
-"text_on_first_onboarding_page" = "Track only what you want";
-"text_on_second_onboarding_page" = "Even if it’s not water intake or yoga";
-"button_text_on_onboarding_pages" = "That’s technology!";
-"header_of_trackers_page" = "Trackers";
-"locale_identifier_of_datePicker" = "en_US";
-"placeholder_of_searchField_on_trackers_page" = "Search";
-"text_of_notFoundLabel_on_trackers_page" = "What would you like to track?";
-"title_of_firstTabBarItem" = "Trackers";
-"title_of_secondTabBarItem" = "Statistics";
-"title_of_newHabitViewController" = "New Habit";
-"placeholder_of_trackerNameTextField_on_newHabit_page" = "Enter tracker name";
-"text_of_category_section_on_newHabit_page" = "Category";
-"text_of_schedule_section_on_newHabit_page" = "Schedule";
-"header_of_collectionViewForEmojis_on_newHabit_page" = "Emoji";
-"header_of_collectionViewForColors_on_newhabit_page" = "Color";
-"title_of_cancelButton_on_newHabit_page" = "Cancel";
-"title_of_createButton_on_newHabit_page" = "Create";
-"title_of_categoryViewController" = "Category";
-"text_of_notFoundLabel_on_category_page" = "Habits and events can be grouped by meaning";
-"text_of_addCategoryButton_on_category_page" = "Add category";
-"title_of_newCategoryViewController" = "New Category";
-"placeholder_of_categoryNameTextField_on_newCategory_page" = "Enter category name";
-"text_of_readyButton_on_newCategory_page" = "Done";
-"title_of_scheduleViewController" = "Schedule";
-"monday_on_schedule_page" = "Monday";
-"tuesday_on_schedule_page" = "Tuesday";
-"wednesday_on_schedule_page" = "Wednesday";
-"thursday_on_schedule_page" = "Thursday";
-"friday_on_schedule_page" = "Friday";
-"saturday_on_schedule_page" = "Saturday";
-"sunday_on_schedule_page" = "Sunday";
-"text_of_readyButton_on_schedule_page" = "Done";
-"daysOfWeek_case_monday" = "Mon";
-"daysOfWeek_case_tuesday" = "Tue";
-"daysOfWeek_case_wednesday" = "Wed";
-"daysOfWeek_case_thursday" = "Thu";
-"daysOfWeek_case_friday" = "Fri";
-"daysOfWeek_case_saturday" = "Sat";
-"daysOfWeek_case_sunday" = "Sun";
-"text_for_daysOfWeek_allDays" = "Every day";
-"text_for_daysOfWeek_workingDays" = "Weekdays";
-"text_for_daysOfWeek_weekendDays" = "Weekends";
-"title_of_error_alert_on_newCategory_page" = "Error";
-"message_of_error_alert_on_newCategory_page" = "This category already exists.";
-"text_of_button_on_error_alert_on_newCategory_page" = "OK";
-"title_of_error_alert_on_newHabit_page" = "Error";
-"message_of_error_alert_on_newHabit_page" = "This tracker already exists.";
-"text_of_button_on_error_alert_on_newHabit_page" = "OK";
-"title_of_error_alert_on_schedule_page" = "At least one day must be selected.";
-"text_of_button_on_error_alert_on_schedule_page" = "OK";
-"text_of_edit_section_in_context_menu" = "Edit";
-"text_of_delete_section_in_context_menu" = "Delete";
-"title_of_editHabitViewController" = "Edit Habit";
-"title_of_saveButton_on_editHabit_page" = "Save";
-"title_of_deleteAlert" = "Are you sure you want to delete this tracker?";
-"deleteButton_of_deleteAlert" = "Delete";
-"cancelButton_of_deleteAlert" = "Cancel";
-"text_of_filterButton_on_trackers_page" = "Filters";
-"text_of_allTrackers_section_on_filters_page" = "All Trackers";
-"text_of_forToday_section_on_filters_page" = "Today's Trackers";
-"text_of_completed_section_on_filters_page" = "Completed";
-"text_of_uncompleted_section_on_filters_page" = "Uncompleted";
-"title_of_filtersViewController" = "Filters";
-"text_of_nothingNotFoundLabel_on_trackers_page" = "Nothing found";
-"header_of_statistics_page" = "Statistics";
-"text_of_nothingToAnalyzeLabel_on_statistics_page" = "Nothing to analyze yet";
-"text_of_bestPeriodLabel_in_statistcs_page" = "Best period";
-"text_of_perfectDaysLabel_in_statistcs_page" = "Perfect days";
-"text_of_completedTrackersLabel_in_statistcs_page" = "Trackers completed";
-"text_of_averageValueLabel_in_statistcs_page" = "Average value";
+// MARK: - Onboarding
+"onboarding.firstPage.text" = "Track only what you want";
+"onboarding.secondPage.text" = "Even if it's not liters of water or yoga";
+"onboarding.button.text" = "That's technology!";
+
+// MARK: - Trackers (Main)
+"trackers.header.title" = "Trackers";
+"trackers.datePicker.localeIdentifier" = "en_US";
+"trackers.searchField.placeholder" = "Search";
+"trackers.notFoundLabel.text" = "What shall we track?";
+"trackers.filterButton.text" = "Filters";
+"trackers.nothingFoundLabel.text" = "Nothing found";
+"trackers.deleteAlert.title" = "Are you sure you want to delete this tracker?";
+
+// MARK: - Tab Bar
+"tabBar.firstItem.title" = "Trackers";
+"tabBar.secondItem.title" = "Statistics";
+
+// MARK: - New Habit
+"newHabit.title" = "New Habit";
+"newHabit.textField.placeholder" = "Enter tracker name";
+"newHabit.categorySection.text" = "Category";
+"newHabit.scheduleSection.text" = "Schedule";
+"newHabit.emojiCollection.header" = "Emoji";
+"newHabit.colorCollection.header" = "Color";
+"newHabit.cancelButton.title" = "Cancel";
+"newHabit.createButton.title" = "Create";
+"newHabit.errorAlert.message" = "This tracker already exists.";
+
+// MARK: - Category
+"category.title" = "Category";
+"category.notFoundLabel.text" = "Habits and events can be grouped by meaning";
+"category.addButton.text" = "Add category";
+"category.deleteAlert.title" = "Are you sure you want to delete this category?";
+
+// MARK: - New Category
+"newCategory.title" = "New Category";
+"newCategory.textField.placeholder" = "Enter category name";
+"newCategory.readyButton.text" = "Done";
+"newCategory.errorAlert.title" = "Error";
+"newCategory.errorAlert.message" = "This category already exists.";
+"newCategory.errorAlert.buttonText" = "OK";
+
+// MARK: - Schedule
+"schedule.title" = "Schedule";
+"schedule.monday" = "Monday";
+"schedule.tuesday" = "Tuesday";
+"schedule.wednesday" = "Wednesday";
+"schedule.thursday" = "Thursday";
+"schedule.friday" = "Friday";
+"schedule.saturday" = "Saturday";
+"schedule.sunday" = "Sunday";
+"schedule.readyButton.text" = "Done";
+"schedule.errorAlert.title" = "You must select at least one day.";
+"schedule.errorAlert.buttonText" = "OK";
+
+// MARK: - Days of Week (Short)
+"daysOfWeek.monday.short" = "Mon";
+"daysOfWeek.tuesday.short" = "Tue";
+"daysOfWeek.wednesday.short" = "Wed";
+"daysOfWeek.thursday.short" = "Thu";
+"daysOfWeek.friday.short" = "Fri";
+"daysOfWeek.saturday.short" = "Sat";
+"daysOfWeek.sunday.short" = "Sun";
+"daysOfWeek.allDays" = "Every day";
+"daysOfWeek.workingDays" = "Weekdays";
+"daysOfWeek.weekendDays" = "Weekends";
+
+// MARK: - Edit Habit
+"editHabit.title" = "Edit Habit";
+"editHabit.saveButton.title" = "Save";
+
+// MARK: - Edit Category
+"editCategory.title" = "Edit Category";
+
+// MARK: - Context Menu
+"contextMenu.editSection.text" = "Edit";
+"contextMenu.deleteSection.text" = "Delete";
+
+// MARK: - Delete Alert
+"deleteAlert.deleteButton.text" = "Delete";
+"deleteAlert.cancelButton.text" = "Cancel";
+
+// MARK: - Error Alerts (Habit)
+"newHabit.errorAlert.title" = "Error";
+"newHabit.errorAlert.buttonText" = "OK";
+
+// MARK: - Filters
+"filters.title" = "Filters";
+"filters.allTrackersSection.text" = "All trackers";
+"filters.todayTrackersSection.text" = "Trackers for today";
+"filters.completedSection.text" = "Completed";
+"filters.uncompletedSection.text" = "Not completed";
+
+// MARK: - Statistics
+"statistics.header.title" = "Statistics";
+"statistics.nothingToAnalyzeLabel.text" = "Nothing to analyze yet";
+"statistics.bestPeriodLabel.text" = "Best period";
+"statistics.perfectDaysLabel.text" = "Perfect days";
+"statistics.completedTrackersLabel.text" = "Trackers completed";
+"statistics.averageValueLabel.text" = "Average value";

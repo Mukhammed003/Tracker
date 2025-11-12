@@ -11,7 +11,7 @@ enum DaysOfWeek: String, CaseIterable, Codable {
     case monday, tuesday, wednesday, thursday, friday, saturday, sunday
     
     var localized: String {
-        NSLocalizedString("daysOfWeek_case_\(rawValue)", comment: "")
+        NSLocalizedString("daysOfWeek.\(rawValue).short", comment: "")
     }
     
     var dayNumber: Int {
@@ -82,15 +82,18 @@ final class Constants {
     
     static let selectedFilterIndex = "selectedFilterIndex"
     
-    static let mondayFullText = NSLocalizedString("monday_on_schedule_page", comment: "")
-    static let tuesdayFullText = NSLocalizedString("tuesday_on_schedule_page", comment: "")
-    static let wednesdayFullText = NSLocalizedString("wednesday_on_schedule_page", comment: "")
-    static let thursdayFullText = NSLocalizedString("thursday_on_schedule_page", comment: "")
-    static let fridayFullText = NSLocalizedString("friday_on_schedule_page", comment: "")
-    static let saturdayFullText = NSLocalizedString("saturday_on_schedule_page", comment: "")
-    static let sundayFullText = NSLocalizedString("sunday_on_schedule_page", comment: "")
+    static let mondayFullText = NSLocalizedString("schedule.monday", comment: "")
+    static let tuesdayFullText = NSLocalizedString("schedule.tuesday", comment: "")
+    static let wednesdayFullText = NSLocalizedString("schedule.wednesday", comment: "")
+    static let thursdayFullText = NSLocalizedString("schedule.thursday", comment: "")
+    static let fridayFullText = NSLocalizedString("schedule.friday", comment: "")
+    static let saturdayFullText = NSLocalizedString("schedule.saturday", comment: "")
+    static let sundayFullText = NSLocalizedString("schedule.sunday", comment: "")
     
-    static let allDaysText = NSLocalizedString("text_for_daysOfWeek_allDays", comment: "")
-    static let workingDaysText = NSLocalizedString("text_for_daysOfWeek_workingDays", comment: "")
-    static let weekendDaysText = NSLocalizedString("text_for_daysOfWeek_weekendDays", comment: "")
+    static let allDaysText = NSLocalizedString("daysOfWeek.allDays", comment: "")
+    static let workingDaysText = NSLocalizedString("daysOfWeek.workingDays", comment: "")
+    static let weekendDaysText = NSLocalizedString("daysOfWeek.weekendDays", comment: "")
+    
+    static let desiredOffsetFromFilterButton = CGFloat(16 + 50) // 50 - height of filterButton, 16 - desired offset from filter button
+    static let heightOfFourSubviewsAndMarginsBetweenThem = CGFloat(90 * 4 + 12 * 3) // 4 sub views with height 90 and 12 margins between them
 }

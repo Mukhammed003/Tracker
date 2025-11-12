@@ -16,10 +16,10 @@ final class FiltersViewController: UIViewController {
     private var selectedFilterIndex: Int?
     private let listOfFilters: [String] = {
         
-        let textOfAllTrackersSection = NSLocalizedString("text_of_allTrackers_section_on_filters_page", comment: "")
-        let textOfForTodaySection = NSLocalizedString("text_of_forToday_section_on_filters_page", comment: "")
-        let textOfCompletedSection = NSLocalizedString("text_of_completed_section_on_filters_page", comment: "")
-        let textOfUncompletedSection = NSLocalizedString("text_of_uncompleted_section_on_filters_page", comment: "")
+        let textOfAllTrackersSection = NSLocalizedString("filters.allTrackersSection.text", comment: "")
+        let textOfForTodaySection = NSLocalizedString("filters.todayTrackersSection.text", comment: "")
+        let textOfCompletedSection = NSLocalizedString("filters.completedSection.text", comment: "")
+        let textOfUncompletedSection = NSLocalizedString("filters.uncompletedSection.text", comment: "")
         
         return [
             textOfAllTrackersSection,
@@ -36,7 +36,7 @@ final class FiltersViewController: UIViewController {
         
         view.backgroundColor = .systemBackground
         
-        let titleOfFiltersViewController = NSLocalizedString("title_of_filtersViewController", comment: "")
+        let titleOfFiltersViewController = NSLocalizedString("filters.title", comment: "")
         
         title = titleOfFiltersViewController
         
