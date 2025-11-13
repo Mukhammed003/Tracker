@@ -28,6 +28,7 @@ final class TrackerCategoryStore: NSObject {
     private var frcDelegate: BaseFetchedResultsControllerDelegate<StoreUpdate>?
     
     private let trackerStore = TrackerStore()
+    private let trackerRecordStore = TrackerRecordStore()
     
     convenience override init() {
         let context: NSManagedObjectContext
@@ -77,6 +78,7 @@ final class TrackerCategoryStore: NSObject {
         category.header = header
         saveContext()
         print("Добавлена новая категория в TrackerCategoryCoreData")
+        debugPrintAllCategories()
     }
     
     func addToExistingTrackerCategory(newTracker: Tracker, header: String) {
@@ -91,6 +93,8 @@ final class TrackerCategoryStore: NSObject {
                 needCategory.addToListOfTrackers(tracker)
                 saveContext()
                 print("Новый трекер добавлен в существующую категорию в TrackerCategoryCoreData")
+                debugPrintAllCategories()
+                trackerStore.debugPrintAllTrackers()
             }
         } catch {
             print("Ошибка при добавлении нового трекера в существующую категорию (TrackerCategoryCoreData): \(error)")
@@ -114,6 +118,148 @@ final class TrackerCategoryStore: NSObject {
         guard let objects = fetchedResultController?.fetchedObjects else { return [] }
         return objects.compactMap { try? trackerCategory(from: $0) }
     }
+    
+    func isExistsSuchCategory(withHeader header: String) -> Bool {
+        guard let objects = fetchedResultController?.fetchedObjects else { return false }
+        
+        return objects.contains(where: { $0.header == header })
+    }
+    
+    func isExistsSuchTrackerInCategory(withHeader header: String, withTracker trackerName: String) -> Bool {
+        guard let categories = fetchedResultController?.fetchedObjects else { return false }
+
+        guard let category = categories.first(where: { $0.header == header }),
+              let trackers = category.listOfTrackers as? Set<TrackerCoreData> else {
+            return false
+        }
+
+        return trackers.contains { $0.name == trackerName }
+    }
+    
+    func deleteTrackerInSuchCategory(trackerId: Int64, header: String) {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "header == %@", header)
+        
+        do {
+            let records = try context.fetch(request)
+            if let needCategory = records.first,
+               let trackers = needCategory.listOfTrackers as? Set<TrackerCoreData>,
+               let trackerToDelete = trackers.first(where: { $0.id == trackerId }) {
+                
+                needCategory.removeFromListOfTrackers(trackerToDelete)
+                context.delete(trackerToDelete)
+                saveContext()
+                
+                print("Трекер с id: \(trackerId) удалён из TrackerCategoryCoreData")
+                debugPrintAllCategories()
+                trackerStore.debugPrintAllTrackers()
+            }
+        }
+        catch {
+            print("Ошибка при удалении трекера из TrackerCategoryCoreData: \(error)")
+        }
+        
+    }
+    
+    func updateTrackerInSuchCategory(categoryName: String, tracker: Tracker, oldCategoryName: String) {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "header == %@", categoryName)
+        
+        do {
+            guard let category = try context.fetch(request).first else {
+                print("❌ Категория \(categoryName) не найдена")
+                return
+            }
+            
+            if let trackers = category.listOfTrackers as? Set<TrackerCoreData>,
+               let existingTracker = trackers.first(where: { $0.id == tracker.id }) {
+                
+                existingTracker.name = tracker.name
+                existingTracker.emoji = tracker.emoji
+                existingTracker.color = tracker.color
+                if let schedule = tracker.schedule {
+                    existingTracker.schedule = schedule as NSArray
+                } else {
+                    existingTracker.schedule = nil
+                }
+                print("✅ Трекер с id \(tracker.id) обновлён в категории \(categoryName)")
+                debugPrintAllCategories()
+                trackerStore.debugPrintAllTrackers()
+            } else {
+                let oldRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+                oldRequest.predicate = NSPredicate(format: "header == %@", oldCategoryName)
+                
+                guard let oldCategory = try context.fetch(oldRequest).first,
+                      let oldTrackers = oldCategory.listOfTrackers as? Set<TrackerCoreData>,
+                      let oldTracker = oldTrackers.first(where: { $0.id == tracker.id }) else {
+                    print("❌ Старый трекер не найден")
+                    return
+                }
+                
+                let newTrackerCD = TrackerCoreData(context: context)
+                newTrackerCD.id = Int64(tracker.id)
+                newTrackerCD.name = tracker.name
+                newTrackerCD.emoji = tracker.emoji
+                newTrackerCD.color = tracker.color
+                newTrackerCD.schedule = tracker.schedule as? NSArray
+                
+                category.addToListOfTrackers(newTrackerCD)
+                
+                if let records = oldTracker.record as? Set<TrackerRecordCoreData> {
+                    for record in records {
+                        record.tracker = newTrackerCD
+                    }
+                    print("📦 Перенесено \(records.count) записей в новый трекер")
+                }
+                
+                context.delete(oldTracker)
+                
+                print("♻️ Трекер перенесён из категории '\(oldCategoryName)' в '\(categoryName)'")
+            }
+            
+            saveContext()
+            debugPrintAllCategories()
+            trackerStore.debugPrintAllTrackers()
+            
+        } catch {
+            print("❌ Ошибка при обновлении трекера в категории \(categoryName): \(error)")
+        }
+    }
+    
+    func deleteCategory(withHeader header: String) {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "header == %@", header)
+        
+        do {
+            if let category = try context.fetch(request).first {
+                context.delete(category)
+                saveContext()
+                print("Категория '\(header)' удалена вместе с трекерами и записями")
+                debugPrintAllCategories()
+                trackerStore.debugPrintAllTrackers()
+            }
+        } catch {
+            print("Ошибка при удалении категории: \(error)")
+        }
+    }
+
+    func updateCategory(oldHeader: String, newHeader: String) {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "header == %@", oldHeader)
+        
+        do {
+            if let category = try context.fetch(request).first {
+                category.header = newHeader
+                saveContext()
+                print("Категория '\(oldHeader)' обновлена на '\(newHeader)'")
+                debugPrintAllCategories()
+                trackerStore.debugPrintAllTrackers()
+            }
+        } catch {
+            print("Ошибка при обновлении категории: \(error)")
+        }
+    }
+
     
     private func trackerCategory(from trackerCategoryCoreData: TrackerCategoryCoreData) throws -> TrackerCategory {
         guard let header = trackerCategoryCoreData.header else {

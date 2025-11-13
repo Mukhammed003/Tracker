@@ -15,7 +15,7 @@ final class TabBarController: UITabBarController {
         
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = .white
+        appearance.backgroundColor = .ypWhite
         
         tabBar.standardAppearance = appearance
         tabBar.scrollEdgeAppearance = appearance
@@ -24,15 +24,21 @@ final class TabBarController: UITabBarController {
     private func setUpTabs() {
         let trackerViewController = TrackersViewController()
         let firstNav = UINavigationController(rootViewController: trackerViewController)
+        
+        let titleOfFirstTabBarItem = NSLocalizedString("tabBar.firstItem.title", comment: "")
+        
         firstNav.tabBarItem = UITabBarItem(
-            title: "Трекеры",
+            title: titleOfFirstTabBarItem,
             image: UIImage(resource: .tabTrackersActive),
             selectedImage: nil)
         
         let statisticsViewController = StatisticsViewController()
         let secondNav = UINavigationController(rootViewController: statisticsViewController)
+        
+        let titleOfSecondTabBarItem = NSLocalizedString("tabBar.secondItem.title", comment: "")
+        
         secondNav.tabBarItem = UITabBarItem(
-            title: "Статистика",
+            title: titleOfSecondTabBarItem,
             image: .tabStatisticsActive,
             selectedImage: nil)
         

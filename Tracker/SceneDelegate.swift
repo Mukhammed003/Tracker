@@ -10,6 +10,7 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    private let analyticsService = AnalyticsService()
 
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
@@ -32,6 +33,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidBecomeActive(_ scene: UIScene) {
         // Called when the scene has moved from an inactive state to an active state.
         // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
+        
+        let params: [AnyHashable: Any] = ["Event": "open", "Screen": "Any", "Item": ""]
+        let eventName = "app_opened"
+        
+        AnalyticsService.addEvent(eventName: eventName, params: params)
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
@@ -50,9 +56,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
 
         // Save changes in the application's managed object context when the application transitions to the background.
+        
+        let params: [AnyHashable: Any] = ["Event": "close", "Screen": "Main", "Item": ""]
+        let eventName = "app_closed"
+        
+        AnalyticsService.addEvent(eventName: eventName, params: params)
+        
         (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
     }
-
-
 }
 

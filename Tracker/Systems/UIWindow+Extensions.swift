@@ -24,3 +24,17 @@ extension UIWindow {
             })
     }
 }
+
+extension Date {
+    var startOfDayUTC: Date {
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        return calendar.startOfDay(for: self)
+    }
+}
+
+extension DaysOfWeek {
+    static func fromLocalized(_ localized: String) -> DaysOfWeek? {
+        return Self.allCases.first { $0.localized == localized }
+    }
+}

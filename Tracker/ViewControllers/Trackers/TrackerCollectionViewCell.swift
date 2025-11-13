@@ -7,7 +7,12 @@
 
 import UIKit
 
-final class TrackerCollectionViewCell: UICollectionViewCell {
+enum MenuAction {
+    case edit
+    case delete
+}
+
+final class TrackerCollectionViewCell: UICollectionViewCell, UIContextMenuInteractionDelegate {
     
     private static let identifier = Constants.trackerCollectionViewCellIdentifier
     
@@ -21,6 +26,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private var trackerID: UInt?
     private var isCompleted: Bool = false
     private var completionHandler: ((UInt, Bool) -> Void)?
+    private var menuHandler: ((UInt, MenuAction) -> Void)?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -34,17 +40,43 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return nil
     }
     
-    func configure(tracker: Tracker, isCompleted: Bool, count: Int, completionHandler: @escaping ((UInt, Bool) -> Void)) {
+    func configure(
+        tracker: Tracker,
+        isCompleted: Bool,
+        count: Int,
+        completionHandler: @escaping ((UInt, Bool) -> Void),
+        menuHandler: @escaping ((UInt, MenuAction) -> Void)
+    ) {
         self.trackerID = tracker.id
         self.isCompleted = isCompleted
         self.completionHandler = completionHandler
+        self.menuHandler = menuHandler
         
         trackerView.backgroundColor = tracker.color
         emojiLabel.text = tracker.emoji
         trackerLabel.text = tracker.name
-        quantityLabel.text = "\(count) \(visualizeCountText(count: count))"
+        quantityLabel.text = "\(visualizeCountText(count: count))"
         
         visualizeQuantityAddButton()
+    }
+    
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        guard let trackerID = trackerID else { return nil }
+        
+        let textOfEditSection = NSLocalizedString("contextMenu.editSection.text", comment: "")
+        let textOfEditDeleteSection = NSLocalizedString("contextMenu.deleteSection.text", comment: "")
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+            guard let self else { return nil }
+            return UIMenu(children: [
+                UIAction(title: textOfEditSection) { _ in
+                    self.menuHandler?(trackerID, .edit)
+                },
+                UIAction(title: textOfEditDeleteSection, attributes: [.destructive]) { _ in
+                    self.menuHandler?(trackerID, .delete)
+                }
+            ])
+        }
     }
     
     @objc private func quantityAddButtonTapped() {
@@ -106,6 +138,10 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private func makeTrackerView() -> UIView {
         let trackerView = UIView()
         trackerView.layer.cornerRadius = 16
+        trackerView.isUserInteractionEnabled = true
+        let interaction = UIContextMenuInteraction(delegate: self)
+        trackerView.addInteraction(interaction)
+        
         trackerView.translatesAutoresizingMaskIntoConstraints = false
         
         return trackerView
@@ -115,7 +151,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let emojiLabel = UILabel()
         emojiLabel.font = UIFont.systemFont(ofSize: 15, weight: .medium)
         emojiLabel.textAlignment = .center
-        emojiLabel.backgroundColor = .ypWhite.withAlphaComponent(0.3)
+        emojiLabel.backgroundColor = .white.withAlphaComponent(0.3)
         emojiLabel.layer.cornerRadius = 12
         emojiLabel.clipsToBounds = true
         emojiLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -126,7 +162,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private func makeTrackerLabel() -> UILabel {
         let trackerLabel = UILabel()
         trackerLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        trackerLabel.textColor = .ypWhite
+        trackerLabel.textColor = .white
         trackerLabel.numberOfLines = 2
         trackerLabel.translatesAutoresizingMaskIntoConstraints = false
         
@@ -172,13 +208,11 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func visualizeCountText(count: Int) -> String {
-        switch count {
-        case 1:
-            return "день"
-        case 2...4:
-            return "дня"
-        default:
-            return "дней"
-        }
+        let numberOfDays = String.localizedStringWithFormat(
+            NSLocalizedString("numberOfDays", comment: "Count of days when trecker is completed"),
+            count)
+        return numberOfDays
     }
 }
+
+

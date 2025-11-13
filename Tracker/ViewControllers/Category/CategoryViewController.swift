@@ -11,15 +11,18 @@ final class CategoryViewController: UIViewController {
     
     var onCategorySelected: ((String) -> Void)?
     
-    private let viewModel: CategoryViewModel
-    
+    private var statisticsManager: StatisticsManager?
+    private var viewModel: CategoryViewModelProtocol
+    private let trackerCategoryStore = TrackerCategoryStore()
+    private let trackerRecordStore = TrackerRecordStore()
+     
     private lazy var tableViewWithCategories: UITableView = makeTableViewWithCategories()
     private lazy var splashContainerView: UIView = makeSplashContainerView()
     private lazy var addCategoryButton: UIButton = makeAddCategoryButton()
     private lazy var notFoundImage: UIImageView = makeNotFoundImage()
     private lazy var notFoundLabel: UILabel = makeNotFoundLabel()
     
-    init(viewModel: CategoryViewModel) {
+    init(viewModel: CategoryViewModelProtocol) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -31,8 +34,13 @@ final class CategoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        statisticsManager = StatisticsManager(categoryStore: trackerCategoryStore, recordStore: trackerRecordStore)
+        
         view.backgroundColor = .systemBackground
-        title = "Категория"
+        
+        let titleOfCategoryViewController = NSLocalizedString("category.title", comment: "")
+        
+        title = titleOfCategoryViewController
         
         setupTableViewWithCategories()
         addSubViews()
@@ -50,7 +58,9 @@ final class CategoryViewController: UIViewController {
     @objc private func buttonAddCategoryClicked() {
         print("Кнопка добавить категорию нажата")
         
-        let newCategoryVc = NewCategoryViewController()
+        let newCategoryViewModel = NewCategoryViewModel(categoryStore: TrackerCategoryStore(), mode: .create)
+        
+        let newCategoryVc = NewCategoryViewController(viewModel: newCategoryViewModel)
         
         newCategoryVc.onNewCategoryCreated = { [weak self] newCategory in
             self?.viewModel.addCategory(newCategory)
@@ -137,23 +147,26 @@ final class CategoryViewController: UIViewController {
     }
     
     private func makeTableViewWithCategories() -> UITableView {
-        let tableViewWithDaysOfWeek = UITableView()
-        tableViewWithDaysOfWeek.backgroundColor = .systemBackground
-        tableViewWithDaysOfWeek.separatorStyle = .singleLine
-        tableViewWithDaysOfWeek.layer.cornerRadius = 16
-        tableViewWithDaysOfWeek.translatesAutoresizingMaskIntoConstraints = false
+        let tableViewWithCategories = UITableView()
+        tableViewWithCategories.backgroundColor = .systemBackground
+        tableViewWithCategories.separatorStyle = .singleLine
+        tableViewWithCategories.layer.cornerRadius = 16
+        tableViewWithCategories.translatesAutoresizingMaskIntoConstraints = false
         
         if #available(iOS 15.0, *) {
-            tableViewWithDaysOfWeek.sectionHeaderTopPadding = 0
+            tableViewWithCategories.sectionHeaderTopPadding = 0
         }
-        tableViewWithDaysOfWeek.tableHeaderView = UIView(frame: .zero)
+        tableViewWithCategories.tableHeaderView = UIView(frame: .zero)
         
-        return tableViewWithDaysOfWeek
+        return tableViewWithCategories
     }
     
     private func makeAddCategoryButton() -> UIButton {
         let addCategoryButton = UIButton(type: .custom)
-        addCategoryButton.setTitle("Добавить категорию", for: .normal)
+        
+        let textOfAddCategoryButton = NSLocalizedString("category.addButton.text", comment: "")
+        
+        addCategoryButton.setTitle(textOfAddCategoryButton, for: .normal)
         addCategoryButton.setTitleColor(.systemBackground, for: .normal)
         addCategoryButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         addCategoryButton.contentHorizontalAlignment = .center
@@ -189,8 +202,10 @@ final class CategoryViewController: UIViewController {
         notFoundLabel.lineBreakMode = .byWordWrapping
         notFoundLabel.textAlignment = .center
         
+        let notFoundLabelText = NSLocalizedString("category.notFoundLabel.text", comment: "")
+        
         let attributedString = NSAttributedString(
-            string: "Привычки и события можно объединить по смыслу",
+            string: notFoundLabelText,
             attributes: [
                 .kern: 0,
                 .foregroundColor: UIColor.ypBlack,
@@ -200,6 +215,70 @@ final class CategoryViewController: UIViewController {
         notFoundLabel.attributedText = attributedString
         
         return notFoundLabel
+    }
+    
+    // Context menu process
+    
+    private func showDeleteAlert(needHeader: String) {
+        let titleOfDeleteAlert = NSLocalizedString("category.deleteAlert.title", comment: "")
+        let textOfDeleteButton = NSLocalizedString("deleteAlert.deleteButton.text", comment: "")
+        let textOfCancelButton = NSLocalizedString("deleteAlert.cancelButton.text", comment: "")
+        
+        let alert = UIAlertController(
+            title: titleOfDeleteAlert,
+            message: nil,
+            preferredStyle: .actionSheet
+        )
+        
+        let deleteAction = UIAlertAction(title: textOfDeleteButton, style: .destructive) { [weak self] _ in
+            self?.deleteCategory(needHeader: needHeader)
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self?.statisticsManager?.recalculateStatistics()
+            }
+        }
+        
+        let cancelAction = UIAlertAction(title: textOfCancelButton, style: .cancel)
+        
+        alert.addAction(deleteAction)
+        alert.addAction(cancelAction)
+        
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = self.view
+            popover.sourceRect = CGRect(
+                x: self.view.bounds.midX,
+                y: self.view.bounds.midY,
+                width: 0,
+                height: 0
+            )
+            popover.permittedArrowDirections = []
+        }
+        
+        present(alert, animated: true)
+    }
+    
+    private func openEditingPageForTracker(
+        oldHeader: String
+    ) {
+        print("Нажали на редактировать в контекстном меню категории")
+        
+        let newCategoryViewModel = NewCategoryViewModel(categoryStore: TrackerCategoryStore(), mode: .edit(oldHeader: oldHeader))
+        
+        let editCategoryVc = NewCategoryViewController(viewModel: newCategoryViewModel)
+        let navVc = UINavigationController(rootViewController: editCategoryVc)
+        navVc.modalPresentationStyle = .pageSheet
+        
+        editCategoryVc.onCategoryEdited = { [weak self] newCategoryName in
+            guard let self = self else { return }
+                
+            viewModel.updateCategory(oldHeader: oldHeader, newHeader: newCategoryName)
+        }
+        
+        present(navVc, animated: true)
+    }
+    
+    private func deleteCategory(needHeader: String) {
+        viewModel.deleteCategory(header: needHeader)
     }
 }
 
@@ -243,7 +322,31 @@ extension CategoryViewController: UITableViewDelegate, UITableViewDataSource {
         dismiss(animated: true)
     }
     
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        let textOfEditSection = NSLocalizedString("contextMenu.editSection.text", comment: "")
+        let textOfEditDeleteSection = NSLocalizedString("contextMenu.deleteSection.text", comment: "")
+        
+        let configuration = UIContextMenuConfiguration(
+            identifier: nil,
+            previewProvider: nil) { _ in
+                
+                let editAction = UIAction(title: textOfEditSection) { _ in
+                    self.openEditingPageForTracker(oldHeader: self.viewModel.categories[indexPath.row].header)
+                }
+                
+                let deleteAction = UIAction(title: textOfEditDeleteSection, attributes: .destructive) { _ in
+                    self.showDeleteAlert(needHeader: self.viewModel.categories[indexPath.row].header)
+                }
+                
+                return UIMenu(title: "", children: [editAction, deleteAction])
+            }
+        
+        return configuration
+    }
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         75
     }
 }
+
+

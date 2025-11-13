@@ -5,7 +5,19 @@
 //  Created by Muhammed Nurmukhanov on 25.10.2025.
 //
 
-final class CategoryViewModel {
+protocol CategoryViewModelProtocol {
+    var selectedCategoryIndex: Int? {get}
+    var onCategoriesChanged: (() -> Void)? { get set }
+    var categories: [TrackerCategory] { get }
+    
+    func addCategory(_ name: String)
+    func selectCategory(at index: Int)
+    func selectedCategoryName() -> String?
+    func deleteCategory(header: String)
+    func updateCategory(oldHeader: String, newHeader: String)
+}
+
+final class CategoryViewModel: CategoryViewModelProtocol {
     
     var selectedCategoryIndex: Int?
     var onCategoriesChanged: (() -> Void)?
@@ -37,4 +49,13 @@ final class CategoryViewModel {
         return categories[index].header
     }
     
+    func deleteCategory(header: String) {
+        categoryStore.deleteCategory(withHeader: header)
+        loadCategories()
+    }
+    
+    func updateCategory(oldHeader: String, newHeader: String) {
+        categoryStore.updateCategory(oldHeader: oldHeader, newHeader: newHeader)
+        loadCategories()
+    }
 }

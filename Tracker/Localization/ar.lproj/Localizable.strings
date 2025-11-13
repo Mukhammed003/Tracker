@@ -1,0 +1,101 @@
+// MARK: - Onboarding
+"onboarding.firstPage.text" = "تتبع فقط ما تريد";
+"onboarding.secondPage.text" = "حتى لو لم تكن لترات من الماء أو اليوغا";
+"onboarding.button.text" = "يا لها من تقنية!";
+
+// MARK: - Trackers (Main)
+"trackers.header.title" = "المتعقبات";
+"trackers.datePicker.localeIdentifier" = "ar_SA";
+"trackers.searchField.placeholder" = "بحث";
+"trackers.notFoundLabel.text" = "ماذا سنقوم بتتبعه؟";
+"trackers.filterButton.text" = "الفلاتر";
+"trackers.nothingFoundLabel.text" = "لم يتم العثور على شيء";
+"trackers.deleteAlert.title" = "هل أنت متأكد أنك تريد حذف هذا المتعقب؟";
+
+// MARK: - Tab Bar
+"tabBar.firstItem.title" = "المتعقبات";
+"tabBar.secondItem.title" = "الإحصائيات";
+
+// MARK: - New Habit
+"newHabit.title" = "عادة جديدة";
+"newHabit.textField.placeholder" = "أدخل اسم المتعقب";
+"newHabit.categorySection.text" = "الفئة";
+"newHabit.scheduleSection.text" = "الجدول";
+"newHabit.emojiCollection.header" = "إيموجي";
+"newHabit.colorCollection.header" = "اللون";
+"newHabit.cancelButton.title" = "إلغاء";
+"newHabit.createButton.title" = "إنشاء";
+"newHabit.errorAlert.message" = "هذا المتعقب موجود بالفعل.";
+
+// MARK: - Category
+"category.title" = "الفئة";
+"category.notFoundLabel.text" = "يمكن تجميع العادات والأحداث حسب المعنى";
+"category.addButton.text" = "إضافة فئة";
+"category.deleteAlert.title" = "هل أنت متأكد أنك تريد حذف هذه الفئة؟";
+
+// MARK: - New Category
+"newCategory.title" = "فئة جديدة";
+"newCategory.textField.placeholder" = "أدخل اسم الفئة";
+"newCategory.readyButton.text" = "تم";
+"newCategory.errorAlert.title" = "خطأ";
+"newCategory.errorAlert.message" = "هذه الفئة موجودة بالفعل.";
+"newCategory.errorAlert.buttonText" = "موافق";
+
+// MARK: - Schedule
+"schedule.title" = "الجدول";
+"schedule.monday" = "الاثنين";
+"schedule.tuesday" = "الثلاثاء";
+"schedule.wednesday" = "الأربعاء";
+"schedule.thursday" = "الخميس";
+"schedule.friday" = "الجمعة";
+"schedule.saturday" = "السبت";
+"schedule.sunday" = "الأحد";
+"schedule.readyButton.text" = "تم";
+"schedule.errorAlert.title" = "يجب اختيار يوم واحد على الأقل.";
+"schedule.errorAlert.buttonText" = "موافق";
+
+// MARK: - Days of Week (Short)
+"daysOfWeek.monday.short" = "اثن";
+"daysOfWeek.tuesday.short" = "ثلث";
+"daysOfWeek.wednesday.short" = "أرب";
+"daysOfWeek.thursday.short" = "خمي";
+"daysOfWeek.friday.short" = "جمع";
+"daysOfWeek.saturday.short" = "سبت";
+"daysOfWeek.sunday.short" = "أحد";
+"daysOfWeek.allDays" = "كل يوم";
+"daysOfWeek.workingDays" = "أيام العمل";
+"daysOfWeek.weekendDays" = "عطلات نهاية الأسبوع";
+
+// MARK: - Edit Habit
+"editHabit.title" = "تعديل العادة";
+"editHabit.saveButton.title" = "حفظ";
+
+// MARK: - Edit Category
+"editCategory.title" = "تعديل الفئة";
+
+// MARK: - Context Menu
+"contextMenu.editSection.text" = "تعديل";
+"contextMenu.deleteSection.text" = "حذف";
+
+// MARK: - Delete Alert
+"deleteAlert.deleteButton.text" = "حذف";
+"deleteAlert.cancelButton.text" = "إلغاء";
+
+// MARK: - Error Alerts (Habit)
+"newHabit.errorAlert.title" = "خطأ";
+"newHabit.errorAlert.buttonText" = "موافق";
+
+// MARK: - Filters
+"filters.title" = "الفلاتر";
+"filters.allTrackersSection.text" = "كل المتعقبات";
+"filters.todayTrackersSection.text" = "متعقبات اليوم";
+"filters.completedSection.text" = "منجز";
+"filters.uncompletedSection.text" = "غير منجز";
+
+// MARK: - Statistics
+"statistics.header.title" = "الإحصائيات";
+"statistics.nothingToAnalyzeLabel.text" = "لا يوجد ما يتم تحليله بعد";
+"statistics.bestPeriodLabel.text" = "أفضل فترة";
+"statistics.perfectDaysLabel.text" = "الأيام المثالية";
+"statistics.completedTrackersLabel.text" = "متعقبات مكتملة";
+"statistics.averageValueLabel.text" = "القيمة المتوسطة";

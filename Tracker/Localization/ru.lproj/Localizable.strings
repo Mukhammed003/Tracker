@@ -1,0 +1,101 @@
+// MARK: - Onboarding
+"onboarding.firstPage.text" = "Отслеживайте только то, что хотите";
+"onboarding.secondPage.text" = "Даже если это не литры воды и йога";
+"onboarding.button.text" = "Вот это технологии!";
+
+// MARK: - Trackers (Main)
+"trackers.header.title" = "Трекеры";
+"trackers.datePicker.localeIdentifier" = "ru_RU";
+"trackers.searchField.placeholder" = "Поиск";
+"trackers.notFoundLabel.text" = "Что будем отслеживать?";
+"trackers.filterButton.text" = "Фильтры";
+"trackers.nothingFoundLabel.text" = "Ничего не найдено";
+"trackers.deleteAlert.title" = "Уверены что хотите удалить трекер?";
+
+// MARK: - Tab Bar
+"tabBar.firstItem.title" = "Трекеры";
+"tabBar.secondItem.title" = "Статистика";
+
+// MARK: - New Habit
+"newHabit.title" = "Новая привычка";
+"newHabit.textField.placeholder" = "Введите название трекера";
+"newHabit.categorySection.text" = "Категория";
+"newHabit.scheduleSection.text" = "Расписание";
+"newHabit.emojiCollection.header" = "Emoji";
+"newHabit.colorCollection.header" = "Цвет";
+"newHabit.cancelButton.title" = "Отменить";
+"newHabit.createButton.title" = "Создать";
+"newHabit.errorAlert.message" = "Такой трекер уже существует.";
+
+// MARK: - Category
+"category.title" = "Категория";
+"category.notFoundLabel.text" = "Привычки и события можно объединить по смыслу";
+"category.addButton.text" = "Добавить категорию";
+"category.deleteAlert.title" = "Уверены что хотите удалить категорию?";
+
+// MARK: - New Category
+"newCategory.title" = "Новая категория";
+"newCategory.textField.placeholder" = "Введите название категории";
+"newCategory.readyButton.text" = "Готово";
+"newCategory.errorAlert.title" = "Ошибка";
+"newCategory.errorAlert.message" = "Такая категория уже существует.";
+"newCategory.errorAlert.buttonText" = "ОК";
+
+// MARK: - Schedule
+"schedule.title" = "Расписание";
+"schedule.monday" = "Понедельник";
+"schedule.tuesday" = "Вторник";
+"schedule.wednesday" = "Среда";
+"schedule.thursday" = "Четверг";
+"schedule.friday" = "Пятница";
+"schedule.saturday" = "Суббота";
+"schedule.sunday" = "Воскресенье";
+"schedule.readyButton.text" = "Готово";
+"schedule.errorAlert.title" = "Надо выбрать хотябы бы один день.";
+"schedule.errorAlert.buttonText" = "ОК";
+
+// MARK: - Days of Week (Short)
+"daysOfWeek.monday.short" = "Пн";
+"daysOfWeek.tuesday.short" = "Вт";
+"daysOfWeek.wednesday.short" = "Ср";
+"daysOfWeek.thursday.short" = "Чт";
+"daysOfWeek.friday.short" = "Пт";
+"daysOfWeek.saturday.short" = "Сб";
+"daysOfWeek.sunday.short" = "Вс";
+"daysOfWeek.allDays" = "Каждый день";
+"daysOfWeek.workingDays" = "Рабочие дни";
+"daysOfWeek.weekendDays" = "Выходные дни";
+
+// MARK: - Edit Habit
+"editHabit.title" = "Редактирование привычки";
+"editHabit.saveButton.title" = "Сохранить";
+
+// MARK: - Edit Category
+"editCategory.title" = "Редактирование категории";
+
+// MARK: - Context Menu
+"contextMenu.editSection.text" = "Редактировать";
+"contextMenu.deleteSection.text" = "Удалить";
+
+// MARK: - Delete Alert
+"deleteAlert.deleteButton.text" = "Удалить";
+"deleteAlert.cancelButton.text" = "Отменить";
+
+// MARK: - Error Alerts (Habit)
+"newHabit.errorAlert.title" = "Ошибка";
+"newHabit.errorAlert.buttonText" = "ОК";
+
+// MARK: - Filters
+"filters.title" = "Фильтры";
+"filters.allTrackersSection.text" = "Все трекеры";
+"filters.todayTrackersSection.text" = "Трекеры на сегодня";
+"filters.completedSection.text" = "Завершенные";
+"filters.uncompletedSection.text" = "Не завершенные";
+
+// MARK: - Statistics
+"statistics.header.title" = "Статистика";
+"statistics.nothingToAnalyzeLabel.text" = "Анализировать пока нечего";
+"statistics.bestPeriodLabel.text" = "Лучший период";
+"statistics.perfectDaysLabel.text" = "Идеальные дни";
+"statistics.completedTrackersLabel.text" = "Трекеров завершено";
+"statistics.averageValueLabel.text" = "Среднее значение";
